@@ -87,11 +87,10 @@ This documentation export reflects the internal PuranOS monorepo at source commi
 
 ## Contact
 
-For consulting opportunities, design-build partnerships, or technical collaboration:
+For technical collaboration:
 
 - Puran Water LLC
 - Hersh Kshetry, Founder & Principal Engineer
 - Website: [puranwater.com](https://puranwater.com/)
 - Contact page: [puranwater.com/contact](https://puranwater.com/contact/)
 - Schedule a call: [calendar.app.google/M1jzSdCB51sYiWux6](https://calendar.app.google/M1jzSdCB51sYiWux6)
-- Office: 801 Main St, Suite 5, Concord, MA 01742
