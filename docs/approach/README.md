@@ -25,8 +25,8 @@ consumer of that substrate.
 
 ### 1. Schema'd state over memory
 
-A properly schema'd database substrate replaces the need for AI "memory"
-systems. The ontology comes from three sources:
+A properly schema'd database substrate is the primary knowledge store,
+reducing the need for separate AI "memory" systems. The ontology comes from three sources:
 
 | Source | Examples | What it provides |
 |--------|----------|-----------------|

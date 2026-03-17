@@ -355,7 +355,7 @@ in the literature are common in production agent systems.
 | Hallucination propagation | Observed across all systems | Schema'd state, typed tool outputs |
 | Memory inconsistency | Observed across all systems | Single source of truth (OpenProject + PostgreSQL) |
 | Unauthorized actions | 33% without identity | Actor identity on board |
-| Framework overhead | 85% of production systems avoid | No frameworks, direct MCP tool calls |
+| Framework overhead | 85% of production case studies avoid (17/20) | No frameworks, direct MCP tool calls |
 
 The pattern is consistent: in the studied settings, systems that treat coordination
 as a prompt engineering problem perform poorly. Systems that treat coordination as a
@@ -370,7 +370,7 @@ PuranOS treats coordination as a state management problem.
 ## Further reading
 
 - [Schema Over Memory Research](schema-over-memory.md) -- Research on why
-  schema'd state beats memory systems
+  schema-first approaches outperform memory systems
 - [Coordination Substrate](../approach/coordination-substrate.md) -- How PuranOS
   applies these findings
 - [Persona Boundaries](../architecture/personas/README.md) -- How bounded agents

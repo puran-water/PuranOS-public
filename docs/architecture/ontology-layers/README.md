@@ -292,7 +292,7 @@ For the full mapping between PuranOS schemas and industry standards, see [Standa
 
 ## Further reading
 
-- [Schema Over Memory](../../approach/schema-over-memory.md) -- why this ontology approach beats memory and RAG
+- [Schema Over Memory](../../approach/schema-over-memory.md) -- why schema-first approaches outperform memory and RAG
 - [Standards and Conformance](../../approach/standards-and-conformance.md) -- how schemas map to industry standards
 - [Engineering Engines](../../approach/engineering-engines.md) -- the engines that produce and consume these schemas
 - [MCP Servers](../mcp-servers/) -- the server surfaces that enforce ontology conformance

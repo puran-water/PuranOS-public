@@ -51,8 +51,8 @@ Detailed treatment: [Coordination and State](coordination-and-state.md)
 
 Research on enterprise AI memory systems consistently shows that
 structured, schema'd state outperforms unstructured memory.
-StructMemEval found that memory helps only when organized into
-task-appropriate structures. "Lost in the Middle" showed that retrieval
+StructMemEval (2026 preprint) found that memory helps only when organized
+into task-appropriate structures. "Lost in the Middle" showed that retrieval
 degrades in long contexts. StateFlow showed that explicit state machines
 beat ReAct-style reasoning at lower cost.
 

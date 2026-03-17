@@ -105,6 +105,6 @@ That split is not incidental. It is what allows the system to be both understand
 The architectural choices documented here are backed by specific design philosophy and research:
 
 - [Why PuranOS Is Built This Way](../approach/README.md) — the five architectural bets
-- [Schema Over Memory](../approach/schema-over-memory.md) — why schema'd state beats memory/RAG
+- [Schema Over Memory](../approach/schema-over-memory.md) — why schema-first approaches outperform memory/RAG
 - [Coordination Substrate](../approach/coordination-substrate.md) — why OpenProject, backed by research
 - [Research Index](../research/README.md) — detailed evidence and counter-evidence

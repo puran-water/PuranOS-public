@@ -22,7 +22,7 @@ This is not a product pitch. There is no signup page, no demo request form, no p
 
 What you will find:
 
-- **The architectural thesis** — why schema'd state beats memory systems for enterprise AI, backed by specific research findings. See [Schema Over Memory](../approach/schema-over-memory.md).
+- **The architectural thesis** — why schema-first approaches outperform memory systems for enterprise AI, backed by specific research findings. See [Schema Over Memory](../approach/schema-over-memory.md).
 
 - **The coordination model** — why a PM tool (OpenProject) serves as the shared board for human+AI task delegation, and what the research says about agent coordination. See [Coordination Substrate](../approach/coordination-substrate.md).
 

@@ -6,7 +6,7 @@ It is built for Puran Water LLC and for industrial design-build firms working in
 
 ## The Central Thesis
 
-Building an AI-native industrial firm requires a properly schema'd data substrate — not a memory or RAG system bolted on later. That substrate comes from three sources: self-hosted enterprise OSS (OpenProject, CRM, inventory, CMMS — each brings a Postgres-backed domain ontology), purpose-built engineering schemas (31-component plant-state model, ~110 process unit types, ISA 5.1 instrumentation, DEXPI equipment classes, model credibility metadata), and custom domain schemas (procurement, bid specification review, compliance). All exposed via typed MCP tool surfaces.
+Building an AI-native industrial firm requires a properly schema'd data substrate first — not a memory or RAG layer as the primary knowledge store. That substrate comes from three sources: self-hosted enterprise OSS (OpenProject, CRM, inventory, CMMS — each brings a Postgres-backed domain ontology), purpose-built engineering schemas (31-component plant-state model, ~110 process unit types, ISA 5.1 instrumentation, DEXPI equipment classes, model credibility metadata), and custom domain schemas (procurement, bid specification review, compliance). All exposed via typed MCP tool surfaces.
 
 This avoids the "Palantir-style" rework where firms with ad-hoc systems must later unify their ontology. The ontology exists by construction — it is the schema of the tools themselves.
 
