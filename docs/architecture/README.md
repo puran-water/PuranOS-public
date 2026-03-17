@@ -96,4 +96,15 @@ That split is not incidental. It is what allows the system to be both understand
 
 - [Agent Runtime](agent-runtime/README.md) — webhook ingress, orchestration, OpenProject collaboration, policy enforcement
 - [MCP Servers](mcp-servers/README.md) — server categories, contracts, and why MCP is the right abstraction here
+- [Persona Boundaries](personas/README.md) — why scoped agent roles matter and how delegation works
+- [Ontology Layers](ontology-layers/README.md) — the three sources of schema'd state and the narrow-waist pattern
 - [Provisioning](../provisioning/README.md) — sanitized deployment model and configuration guidance
+
+## Approach and Research
+
+The architectural choices documented here are backed by specific design philosophy and research:
+
+- [Why PuranOS Is Built This Way](../approach/README.md) — the five architectural bets
+- [Schema Over Memory](../approach/schema-over-memory.md) — why schema'd state beats memory/RAG
+- [Coordination Substrate](../approach/coordination-substrate.md) — why OpenProject, backed by research
+- [Research Index](../research/README.md) — detailed evidence and counter-evidence

@@ -42,9 +42,10 @@ The `processeng-workspace` contains the bulk of the domain-specific engineering 
 - treatment process design
 - diagramming and layout
 - corrosion, heat transfer, and fluids analysis
-- plant-state representations
 - WaterTAP- and QSDsan-oriented development work
-- discipline-specific design servers such as clarifiers, degassers, evaporators, RO, IX, and more
+- discipline-specific design servers such as degassers, evaporators, RO, IX, and more
+
+Plant state (process stream data) is managed via filesystem JSON files and the `plant-state-skill`, not as an MCP server. Stream state files at `mcp-outputs/streams/` conform to the plant-state schema and are validated by engineering-utils Pydantic models.
 
 This is supported by shared utilities in `libs/engineering-utils/`.
 
