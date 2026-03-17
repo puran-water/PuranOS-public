@@ -12,6 +12,14 @@ The goal is transparency: the reader should understand not just what
 PuranOS does, but why specific architectural choices were made and what
 evidence supports them.
 
+**A note on evidence quality:** The evidence cited here is predominantly
+arXiv preprints, technical reports, and experiment repositories — not
+mature peer-reviewed industrial-operations evidence. The conclusions are
+research-informed, not research-settled. Where findings come from
+peer-reviewed publications (e.g., Lost in the Middle, QSDsan), that is
+noted. Where they come from preprints or experiment repos, the inferential
+weight should be calibrated accordingly.
+
 ## The central question
 
 How should an AI-native industrial firm organize its data, coordinate its

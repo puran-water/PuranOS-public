@@ -244,9 +244,11 @@ state, providing debugging and training artifacts. PuranOS's execution
 ledger serves the same function, with the addition that the
 human-readable layer lives in OpenProject.
 
-**LLM-Based Multi-Agent Blackboard System**. Shared blackboard shows
-13-57% improvement over RAG and master-slave baselines. OpenProject is
-the blackboard.
+**LLM-Based Multi-Agent Blackboard System (2025)**. Shared blackboard
+shows 13-57% improvement over RAG and master-slave baselines in
+data-science information discovery. The general shared-workspace
+principle supports the OpenProject-as-blackboard pattern, though the
+specific domain differs from industrial project delivery.
 
 ---
 
@@ -255,19 +257,20 @@ the blackboard.
 The research also contains significant warnings. Ignoring them would be
 negligent.
 
-**"Why Do Multi-Agent LLM Systems Fail?"** reports high failure rates
-across multiple studied multi-agent frameworks. The dominant failure modes: cascading
-errors between agents, ambiguous task boundaries, and unchecked
-hallucination propagation. Memory and state management fixes help but
-are inconsistent.
+**"Why Do Multi-Agent LLM Systems Fail?" (2025)** reports high failure rates
+(41–87%) across evaluated SOTA open-source multi-agent systems. The dominant
+failure modes: cascading errors between agents, ambiguous task boundaries,
+and unchecked hallucination propagation. Memory and state management fixes
+help but are inconsistent.
 
-**"Rethinking the Value of Multi-Agent Workflow"** shows that a single
+**"Rethinking the Value of Multi-Agent Workflow" (2026)** shows that a single
 agent with the right tools can match multi-agent performance at lower
 cost, thanks to KV-cache reuse and preserved context.
 
-**MAP (Measuring Agents in Production)** finds (across varying sample bases) that most production
-agent deployments use manual prompt construction, limit agents to 10 or
-fewer steps, use no agent frameworks, and rely on
+**MAP (Measuring Agents in Production, 2025)** finds (across varying sample
+bases) that most production agent deployments use manual prompt
+construction, limit agents to 10 or fewer steps, avoid agent frameworks
+(85% — from 17 of 20 production case studies), and rely on
 human-in-the-loop evaluation.
 
 PuranOS responds to this evidence with four specific design choices:

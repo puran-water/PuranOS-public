@@ -1,8 +1,9 @@
-# Why Schema Beats Memory
+# Schema First: Why Structured State Outperforms Memory Systems
 
 > Research evidence for PuranOS's central architectural thesis:
-> a properly schema'd database substrate is superior to memory/RAG/vector stores
-> for enterprise AI in domains with known ontologies.
+> a properly schema'd database substrate outperforms memory/RAG/vector stores
+> for enterprise AI in domains with known ontologies. Memory remains appropriate
+> for unstructured residue and conversational continuity.
 
 ---
 
@@ -123,18 +124,21 @@ existed.
 
 ## Research evidence
 
-### StructMemEval (2026)
+### StructMemEval (2026 preprint)
 
 Evaluated structured versus unstructured memory for AI agents across multiple
 task types. The benchmark tests agents on tasks requiring persistent state
-management over extended interactions.
+management over extended interactions. (Note: this is a February 2026 preprint /
+work in progress, not yet peer-reviewed.)
 
 Key finding: structured memory outperforms unstructured memory only when
 organized into task-appropriate structure. Ledgers for financial tracking. Trees
 for hierarchical data. Trackers for state management.
 
 Free-form memory blobs do not reliably outperform simple context windows. The
-structure must match the domain.
+structure must match the domain. Importantly, the paper does not prove that
+application schemas universally dominate memory — it shows that memory systems
+work when structure matches task structure.
 
 | Memory type | When it helps | When it fails |
 |---|---|---|
@@ -205,23 +209,30 @@ relevant data. Not a compressed version of everything it has ever discussed
 about procurement. Not a lossy summary. The exact rows.
 
 
-### Long-context versus memory (2024)
+### Long-context versus memory (2024–2026)
 
-Comparative studies on LoCoMo and LongMemEval benchmarks found:
+Comparative studies on LoCoMo and LongMemEval benchmarks found that long context
+is more accurate than fact-extraction memory but more expensive. Memory-based
+approaches are cheaper but less accurate. A March 2026 comparison found
+long-context GPT-5-mini outperforming a fact-based memory system on LongMemEval
+and LoCoMo, while memory becomes cheaper only after enough turns.
 
 | Approach | Accuracy | Cost at 10 turns | Cost at 100+ turns |
 |---|---|---|---|
 | Long context (full history) | Highest | Moderate | Very high |
 | Fact-extraction memory | Lower | Lower | Lower |
-| Schema'd query (PuranOS inference) | Highest (structured data) | Lowest | Lowest |
+| Schema'd query (PuranOS extrapolation — not experimentally measured) | Expected highest for structured data | Expected lowest | Expected lowest |
 
-Long context is more accurate than fact-extraction memory but more expensive.
-Memory-based approaches are cheaper but less accurate. Neither approaches the
-reliability of direct database queries for structured data.
+The third row is a PuranOS architectural inference, not a published experimental
+result. The research directly supports skepticism toward naive long-context
+stuffing and naive RAG, but newer memory-structure work complicates a simple
+binary. The evidence supports **schema-first for structured enterprise state**,
+not a blanket anti-memory conclusion.
 
-**Implication for PuranOS:** The trade-off between accuracy (long context) and
-cost (memory extraction) does not apply when the data is already structured in
-a database. Schema'd queries are both more accurate AND cheaper.
+**Implication for PuranOS:** For data already structured in a database, schema'd
+queries should be both more accurate and cheaper than either approach. For
+unstructured conversational context and residual knowledge, memory approaches
+remain appropriate.
 
 ---
 
@@ -330,18 +341,24 @@ memory extraction pipeline.
 
 ## Summary of evidence
 
-| Claim | Supporting evidence | Mechanism |
-|---|---|---|
-| RAG degrades with scale | Lost in the Middle (Liu 2023) | Positional bias in attention |
-| Structured > unstructured memory | StructMemEval (2024) | Task-appropriate structure matches domain |
-| Procedural > episodic memory | Agent Workflow Memory (Wang 2024) | Workflows transfer; episodes may not |
-| State machines > free-form reasoning | StateFlow (Wu 2024) | Explicit transitions reduce error and cost |
-| Context compression helps | Multiple (2023-2024) | Most context is not load-bearing |
-| Long context > memory but costlier | LoCoMo/LongMemEval (2024) | Schema'd queries avoid the trade-off |
+| Claim | Supporting evidence | Evidence tier | Mechanism |
+|---|---|---|---|
+| RAG degrades with scale | Lost in the Middle (Liu 2023) | Peer-reviewed | Positional bias in attention |
+| Structured > unstructured memory (when structure matches domain) | StructMemEval (2026 preprint) | Preprint | Task-appropriate structure matches domain |
+| Procedural > episodic memory | Agent Workflow Memory (Wang 2024) | Preprint | Workflows transfer; episodes may not |
+| State machines > free-form reasoning | StateFlow (Wu 2024) | Preprint | Explicit transitions reduce error and cost |
+| Context compression helps | Multiple (2023-2024) | Mixed (peer-reviewed + preprint) | Most context is not load-bearing |
+| Long context > memory but costlier | LoCoMo/LongMemEval (2024-2026) | Preprint | Schema'd queries expected to avoid the trade-off |
 
-The convergent finding: structure beats retrieval. When the structure already
+The convergent finding: for domains with known ontologies, schema-first
+approaches outperform retrieval-based approaches. When the structure already
 exists in enterprise applications, building a parallel unstructured retrieval
-layer is not just redundant — it is actively worse.
+layer is redundant. Memory remains appropriate for unstructured conversational
+context and domains without established schemas.
+
+Note: this evidence stack is predominantly arXiv preprints, technical reports,
+and experiment repositories — not mature peer-reviewed industrial-operations
+evidence. The conclusions are research-informed, not research-settled.
 
 ---
 

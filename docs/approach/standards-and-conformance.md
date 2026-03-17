@@ -18,7 +18,7 @@ speaks the same language as the rest of the industry.
 
 | Standard | What It Governs | How PuranOS Aligns |
 |---|---|---|
-| DEXPI (ISO 15926 profile) | P&ID data exchange -- equipment, piping, instrumentation in Proteus XML | Engineering MCP uses DEXPI-derived enumerations (re-exported from pyDEXPI, not locally invented) and generates Proteus XML output. Full DEXPI conformance validation is a future goal; current alignment is at the enumeration and export format level. |
+| DEXPI (ISO 15926 profile) | P&ID data exchange -- equipment, piping, instrumentation. DEXPI 2.0 uses a standardized DEXPI XML serialization that supersedes the earlier Proteus XML schema. | Engineering MCP uses DEXPI-derived enumerations (re-exported from pyDEXPI, not locally invented). Current alignment is at the enumeration level. Export format targets DEXPI XML (the current standard serialization); legacy Proteus XML export is supported but not the primary format. Full DEXPI conformance validation is a future goal. |
 | ISO 15926 | Process plant lifecycle data integration | DEXPI alignment inherits ISO 15926 semantics. Plant-state schema and equipment models use compatible entity identifiers. |
 | ISA-95 / IEC 62264 | Enterprise-to-control integration boundaries | Equipment hierarchy is aligned with ISA-95 concepts (Area, Work Center, Work Unit). Process-unit taxonomy uses an ISA-95-inspired hierarchy for organizing ~110 unit types across 8 treatment areas. |
 | ISA 5.1 | Instrument identification and tagging | Loop, instrument, and tag schemas encode ISA 5.1 function groups. Tag format schema enforces the area-code-sequence pattern. Instrument types carry ISA 5.1 letter codes. |
@@ -83,7 +83,11 @@ systems when industry-accepted ones exist.
 
 DEXPI (Data Exchange in the Process Industry) defines how P&ID data should be
 structured for exchange between engineering tools. It specifies equipment classes,
-piping component types, and instrumentation categories using a Proteus XML schema.
+piping component types, and instrumentation categories.
+
+DEXPI 2.0 introduced a standardized DEXPI XML serialization that supersedes the
+earlier Proteus XML schema. The current DEXPI specification can be used fully
+without Proteus XML. PuranOS targets the current DEXPI standard.
 
 PuranOS's engineering MCP server uses DEXPI enumerations directly, re-exported from
 the pyDEXPI library. This means:
@@ -91,8 +95,8 @@ the pyDEXPI library. This means:
 - Equipment types in PuranOS P&IDs use DEXPI classification codes.
 - Piping components use DEXPI-defined types (10 piping enumeration categories).
 - Instrumentation uses DEXPI-defined instrument categories.
-- The resulting P&ID data can be exported as Proteus XML for exchange with other
-  DEXPI-compliant tools.
+- The resulting P&ID data targets DEXPI XML export for exchange with other
+  DEXPI-compliant tools. Legacy Proteus XML export is also supported.
 
 The enumerations are not locally invented. They are imported from pyDEXPI, which
 implements the DEXPI standard. This ensures that PuranOS speaks the same equipment

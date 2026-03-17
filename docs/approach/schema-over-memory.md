@@ -247,11 +247,11 @@ does not exist.
 
 The schema-over-memory thesis is supported by several lines of research:
 
-- **StructMemEval** found that structured memory outperforms unstructured
-  memory only when organized into task-appropriate structure (ledgers, trees,
-  trackers). Free-form memory blobs do not reliably outperform simple context
-  windows. The lesson: structure matters, and the best structure is one that
-  matches the domain — which is exactly what application schemas provide.
+- **StructMemEval (2026 preprint)** found that structured memory outperforms
+  unstructured memory only when organized into task-appropriate structure
+  (ledgers, trees, trackers). Free-form memory blobs do not reliably outperform
+  simple context windows. The lesson: structure matters, and the best structure
+  is one that matches the domain — which is what application schemas provide.
 
 - **"Lost in the Middle"** showed that LLM retrieval accuracy degrades when
   relevant information is embedded in long contexts. More context is not

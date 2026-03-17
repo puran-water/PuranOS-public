@@ -157,14 +157,21 @@ tool calls, and side effects as structured data. These records serve the same
 function: debugging, audit, and potential future training.
 
 
-### LLM-Based Multi-Agent Blackboard System
+### LLM-Based Multi-Agent Blackboard System (2025)
 
-A shared blackboard (structured common workspace) shows 13-57% improvement over
-RAG-based and master-slave baselines in collaborative problem-solving.
+A shared blackboard (structured common workspace) shows 13-57% relative
+improvement over RAG-based and master-slave baselines in collaborative
+problem-solving. Note: this paper evaluates **data-science information discovery
+over data lakes**, not industrial project delivery. The general principle — that
+shared workspaces improve coordination — transfers, but the specific domain and
+performance numbers do not directly validate an OpenProject-centered coordination
+layer for industrial engineering.
 
-**Relevance:** Direct validation of the shared board pattern. OpenProject serves
-as PuranOS's blackboard -- a structured workspace where all personas can read
-context and write results.
+**Relevance:** Supports the shared board pattern as a coordination primitive.
+OpenProject serves as PuranOS's blackboard — a structured workspace where all
+personas can read context and write results. The extrapolation from data-science
+tasks to industrial project coordination remains an architectural inference, not
+a directly demonstrated result.
 
 
 ### Voyager (Wang et al., 2023)
@@ -198,10 +205,12 @@ The research is not uniformly positive. PuranOS takes the following
 counter-evidence seriously.
 
 
-### "Why Do Multi-Agent LLM Systems Fail?" (2024)
+### "Why Do Multi-Agent LLM Systems Fail?" (2025)
 
-Studies multiple multi-agent frameworks and reports high failure rates across evaluated systems.
-Dominant failure modes:
+Studies multiple multi-agent frameworks and reports high failure rates (41% to
+86.7%) across evaluated SOTA open-source multi-agent systems. These are
+benchmarked MAS traces, not a universal statement about all production
+multi-agent systems. Dominant failure modes:
 
 - **Cascading errors.** One agent's mistake propagates through the system.
 - **Ambiguous task boundaries.** Agents duplicate work or leave gaps.
@@ -219,7 +228,7 @@ hallucination propagation (a fabricated equipment spec fails schema validation).
 Structured state prevents memory management failures.
 
 
-### "Rethinking the Value of Multi-Agent Workflow" (2024)
+### "Rethinking the Value of Multi-Agent Workflow" (2026)
 
 Shows that a single agent with the right tools can match multi-agent performance
 at lower cost, thanks to KV-cache reuse and preserved context.
@@ -243,16 +252,19 @@ They are doing different tasks with different tools. The value comes from
 specialization and boundary discipline, not from ensemble effects.
 
 
-### MAP: Measuring Agents in Production (2024)
+### MAP: Measuring Agents in Production (2025)
 
 Survey of production agent deployments (with varying sample bases per finding) reports:
 
-| Finding | Percentage |
-|---|---|
-| Use manual prompt construction (not frameworks) | 79% |
-| Limit agents to 10 or fewer steps | 68% |
-| Use no agent frameworks (LangChain, CrewAI, etc.) | 85% |
-| Rely on human-in-the-loop evaluation | 74% |
+| Finding | Percentage | Sample base |
+|---|---|---|
+| Use manual prompt construction (not frameworks) | 79% | Survey respondents |
+| Limit agents to 10 or fewer steps | 68% | Survey respondents |
+| Use no agent frameworks (LangChain, CrewAI, etc.) | 85% | 17 of 20 production case studies |
+| Rely on human-in-the-loop evaluation | 74% | Survey respondents |
+
+Note: the 85% "custom over frameworks" figure comes from 17 of 20 production
+case studies, not the same survey base as the other percentages.
 
 **PuranOS response:** This validates several PuranOS design choices. Skills are
 "manual prompt construction" -- they define exactly what tools to call and in
@@ -260,15 +272,20 @@ what order. Workflows are shallow (typically 5-10 steps). No agent frameworks
 are used. Human review gates are explicit (the accountable role in OpenProject).
 
 
-### AgentArch (2024)
+### AgentArch (2025)
 
-The best model/configuration combination achieves only 70.8% on simpler
-enterprise tasks. Multi-agent ReAct configurations perform especially poorly.
+The best model/configuration combination achieves only 70.8% on the simpler
+time-off task and 35.3% on the harder customer-routing task. Multi-agent ReAct
+configurations perform especially poorly. However, the paper shows
+model-specific preferences — GPT-4.1-mini had single-agent ReAct settings that
+beat some function-calling settings — so the relationship between architecture
+and performance is not universal.
 
 **PuranOS response:** PuranOS uses function-calling, not ReAct. Agents call
 typed MCP tools directly rather than reasoning through chains of thought about
-which tool to use. This aligns with the finding that ReAct-style configurations
-underperform.
+which tool to use. This is consistent with AgentArch's general finding that
+ReAct-style configurations tend to underperform, while acknowledging that the
+optimal architecture may vary by model and task complexity.
 
 
 ---
@@ -333,7 +350,7 @@ in the literature are common in production agent systems.
 
 | Failure mode | Frequency in literature | PuranOS mitigation |
 |---|---|---|
-| Cascading errors | 41-87% system failure rate | Persona boundaries, schema validation |
+| Cascading errors | 41-87% failure rate in evaluated SOTA MAS | Persona boundaries, schema validation |
 | Ambiguous task boundaries | Dominant failure mode | Explicit delegation via OpenProject |
 | Hallucination propagation | Observed across all systems | Schema'd state, typed tool outputs |
 | Memory inconsistency | Observed across all systems | Single source of truth (OpenProject + PostgreSQL) |
