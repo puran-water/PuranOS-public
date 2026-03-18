@@ -34,10 +34,11 @@ At enterprise scale, these approaches fail in predictable ways.
 
 ### Context bloat
 
-**"Lost in the Middle" (Liu et al., 2023)** demonstrated that LLM performance
-on retrieval tasks degrades when relevant information sits in the middle of long
-contexts. Models reliably find information at the beginning or end of their
-context window but struggle with information positioned centrally.
+**[Lost in the Middle](https://arxiv.org/abs/2307.03172) (Liu et al., 2023 — peer-reviewed)**
+demonstrated that LLM performance on retrieval tasks degrades when relevant
+information sits in the middle of long contexts. Models reliably find information
+at the beginning or end of their context window but struggle with information
+positioned centrally.
 
 This directly undermines RAG approaches that retrieve and concatenate chunks.
 More retrieved context is not reliably better. It can actively degrade
@@ -124,7 +125,7 @@ existed.
 
 ## Research evidence
 
-### StructMemEval (2026 preprint)
+### StructMemEval (February 2026 preprint) — [preprint](https://arxiv.org/abs/2602.11243)
 
 Evaluated structured versus unstructured memory for AI agents across multiple
 task types. The benchmark tests agents on tasks requiring persistent state
@@ -153,7 +154,7 @@ engineering state. These are not generic "structured memory." They are
 domain-specific structure built by experts in each domain.
 
 
-### Agent Workflow Memory (Wang et al., 2024)
+### Agent Workflow Memory (Wang et al., 2024) — [preprint](https://arxiv.org/abs/2409.07429)
 
 Compared episodic memory (replay of past interactions) against procedural memory
 (reusable workflows extracted from successful task completions).
@@ -174,7 +175,7 @@ MLE sizing may or may not transfer. See [Ontology Layers](../architecture/ontolo
 for how skills, schemas, and session context compose.
 
 
-### StateFlow (Wu et al., 2024)
+### StateFlow (Wu et al., 2024) — [preprint](https://arxiv.org/abs/2403.11322)
 
 Compared explicit state machine-based agent workflows against ReAct-style
 free-form reasoning.
@@ -194,6 +195,21 @@ Review, Closed). The execution ledger records state transitions. Neither relies
 on agents remembering what state they are in. The application enforces it.
 
 
+### AgentSM: Semantic memory for enterprise reasoning (Jan 2026) — [preprint](https://arxiv.org/abs/2601.15709)
+
+AgentSM introduces semantic memory for text-to-SQL tasks, storing structured
+programs rather than raw text. The system retrieves previously successful query
+structures and adapts them to new questions, bridging the gap between
+unstructured user intent and structured database operations.
+
+**Implication for PuranOS:** AgentSM validates the principle that schema-heavy
+enterprise reasoning benefits from structured program storage rather than raw
+memory. PuranOS skills serve a similar function — they encode structured
+procedures (tool call sequences, parameter mappings) that map domain intent to
+schema'd operations. The difference is that PuranOS encodes these as
+expert-curated skills rather than auto-extracted query patterns.
+
+
 ### Context compression literature
 
 Multiple studies (Ge et al. 2023; Jiang et al. 2023; Chevalier et al. 2023)
@@ -208,26 +224,45 @@ the procurement schema for vendor quotes on RO membranes gets exactly the
 relevant data. Not a compressed version of everything it has ever discussed
 about procurement. Not a lossy summary. The exact rows.
 
+**[Beyond a Million Tokens](https://arxiv.org/abs/2510.27246) (ICLR 2026 —
+peer-reviewed)** introduced the BEAM benchmark testing up to 10M tokens. At
+these scales, context compression and selective retrieval become essential —
+no model can attend uniformly over 10M tokens. This reinforces the schema-first
+approach: for structured enterprise data, querying the schema returns exactly
+the needed rows regardless of how much total data exists. The 10M-token problem
+simply does not arise when the retrieval mechanism is a typed query, not a
+context window.
 
-### Long-context versus memory (2024–2026)
+
+### Long-context versus memory (2024-2026)
 
 Comparative studies on LoCoMo and LongMemEval benchmarks found that long context
 is more accurate than fact-extraction memory but more expensive. Memory-based
-approaches are cheaper but less accurate. A March 2026 comparison found
-long-context GPT-5-mini outperforming a fact-based memory system on LongMemEval
-and LoCoMo, while memory becomes cheaper only after enough turns.
+approaches are cheaper but less accurate.
+
+**[AMA-Bench](https://arxiv.org/abs/2602.22769) (preprint, Feb 2026)** provides
+a long-horizon memory benchmark and finds that many purpose-built memory systems
+underperform long-context baselines. This is a striking result: the specialized
+memory systems designed to solve the long-context problem often do not beat
+simply stuffing the full history into the context window.
+
+**[Beyond the Context Window](https://arxiv.org/abs/2603.04814) (preprint, Mar
+2026)** directly compared Mem0 (a fact-extraction memory system) against
+long-context GPT-5-mini. Long-context GPT-5-mini outperformed Mem0 on
+LongMemEval and LoCoMo benchmarks. Memory becomes cost-advantaged only after
+enough turns accumulate.
 
 | Approach | Accuracy | Cost at 10 turns | Cost at 100+ turns |
 |---|---|---|---|
 | Long context (full history) | Highest | Moderate | Very high |
-| Fact-extraction memory | Lower | Lower | Lower |
+| Fact-extraction memory | Lower (often worse than long-context baselines per AMA-Bench) | Lower | Lower |
 | Schema'd query (PuranOS extrapolation — not experimentally measured) | Expected highest for structured data | Expected lowest | Expected lowest |
 
 The third row is a PuranOS architectural inference, not a published experimental
-result. The research directly supports skepticism toward naive long-context
-stuffing and naive RAG, but newer memory-structure work complicates a simple
-binary. The evidence supports **schema-first for structured enterprise state**,
-not a blanket anti-memory conclusion.
+result. The research directly supports skepticism toward both naive long-context
+stuffing and purpose-built memory systems. The evidence supports **schema first
+for structured enterprise state; memory for unstructured residue and
+conversational continuity** — not a blanket anti-memory conclusion.
 
 **Implication for PuranOS:** For data already structured in a database, schema'd
 queries should be both more accurate and cheaper than either approach. For
@@ -318,7 +353,8 @@ This document does not argue that:
 **Memory systems are never useful.** For truly unstructured domains with no
 known ontology, memory approaches may be the best available option. Not every
 domain has the decades of standardization that industrial process engineering
-has.
+has. Even in structured domains, conversational continuity and unstructured
+residue (e.g., meeting notes, informal context) benefit from memory approaches.
 
 **RAG has no place.** Document retrieval over unstructured text — regulations,
 specifications, vendor literature — remains valuable when the source material is
@@ -343,22 +379,28 @@ memory extraction pipeline.
 
 | Claim | Supporting evidence | Evidence tier | Mechanism |
 |---|---|---|---|
-| RAG degrades with scale | Lost in the Middle (Liu 2023) | Peer-reviewed | Positional bias in attention |
-| Structured > unstructured memory (when structure matches domain) | StructMemEval (2026 preprint) | Preprint | Task-appropriate structure matches domain |
-| Procedural > episodic memory | Agent Workflow Memory (Wang 2024) | Preprint | Workflows transfer; episodes may not |
-| State machines > free-form reasoning | StateFlow (Wu 2024) | Preprint | Explicit transitions reduce error and cost |
-| Context compression helps | Multiple (2023-2024) | Mixed (peer-reviewed + preprint) | Most context is not load-bearing |
-| Long context > memory but costlier | LoCoMo/LongMemEval (2024-2026) | Preprint | Schema'd queries expected to avoid the trade-off |
+| RAG degrades with scale | [Lost in the Middle](https://arxiv.org/abs/2307.03172) (Liu 2023) | Peer-reviewed | Positional bias in attention |
+| Structured > unstructured memory (when structure matches domain) | [StructMemEval](https://arxiv.org/abs/2602.11243) (Feb 2026) | Preprint | Task-appropriate structure matches domain |
+| Procedural > episodic memory | [Agent Workflow Memory](https://arxiv.org/abs/2409.07429) (Wang 2024) | Preprint | Workflows transfer; episodes may not |
+| State machines > free-form reasoning | [StateFlow](https://arxiv.org/abs/2403.11322) (Wu 2024) | Preprint | Explicit transitions reduce error and cost |
+| Context compression helps; extreme scale needs selective retrieval | Multiple (2023-2024); [Beyond a Million Tokens](https://arxiv.org/abs/2510.27246) (ICLR 2026) | Mixed (peer-reviewed + preprint) | Most context is not load-bearing; 10M tokens exceeds attention capacity |
+| Long context > memory but costlier; many memory systems underperform baselines | [AMA-Bench](https://arxiv.org/abs/2602.22769) (Feb 2026); [Beyond the Context Window](https://arxiv.org/abs/2603.04814) (Mar 2026) | Preprint | Schema'd queries expected to avoid the trade-off |
+| Schema-heavy reasoning benefits from structured program storage | [AgentSM](https://arxiv.org/abs/2601.15709) (Jan 2026) | Preprint | Structured programs > raw text for enterprise reasoning |
+| Enterprise workflows need domain-specific evaluation | [WoW-bench](https://arxiv.org/abs/2601.22130); [Agent-Diff](https://arxiv.org/abs/2602.11224); [FireBench](https://arxiv.org/abs/2603.04857) | Preprint | Toy benchmarks miss enterprise complexity |
 
 The convergent finding: for domains with known ontologies, schema-first
 approaches outperform retrieval-based approaches. When the structure already
 exists in enterprise applications, building a parallel unstructured retrieval
 layer is redundant. Memory remains appropriate for unstructured conversational
-context and domains without established schemas.
+context, residual knowledge, and domains without established schemas.
 
-Note: this evidence stack is predominantly arXiv preprints, technical reports,
-and experiment repositories — not mature peer-reviewed industrial-operations
-evidence. The conclusions are research-informed, not research-settled.
+Note: this evidence stack includes peer-reviewed publications (Lost in the
+Middle, Beyond a Million Tokens at ICLR 2026, Why Do Multi-Agent LLM Systems
+Fail? at NeurIPS 2025), a peer-reviewed journal paper
+([QSDsan](https://pubs.rsc.org/en/content/articlelanding/2022/ew/d2ew00455k),
+2022), a technical report ([MAP](https://arxiv.org/abs/2512.04123), 2025), and
+multiple arXiv preprints. The conclusions are research-informed, not
+research-settled.
 
 ---
 

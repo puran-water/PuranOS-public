@@ -12,13 +12,19 @@ The goal is transparency: the reader should understand not just what
 PuranOS does, but why specific architectural choices were made and what
 evidence supports them.
 
-**A note on evidence quality:** The evidence cited here is predominantly
-arXiv preprints, technical reports, and experiment repositories — not
-mature peer-reviewed industrial-operations evidence. The conclusions are
+**A note on evidence quality:** The evidence cited here spans multiple
+tiers: peer-reviewed publications (e.g., [Lost in the Middle](https://arxiv.org/abs/2307.03172),
+[QSDsan](https://pubs.rsc.org/en/content/articlelanding/2022/ew/d2ew00455k),
+[Beyond a Million Tokens](https://arxiv.org/abs/2510.27246) at ICLR 2026,
+[Why Do Multi-Agent LLM Systems Fail?](https://openreview.net/forum?id=fAjbYBmonr)
+at NeurIPS 2025), technical reports
+([MAP](https://arxiv.org/abs/2512.04123)), arXiv preprints, and experiment
+repositories ([LLMenron](https://github.com/strangeloopcanon/llmenron)).
+Each citation is tagged with its evidence tier. The conclusions are
 research-informed, not research-settled. Where findings come from
-peer-reviewed publications (e.g., Lost in the Middle, QSDsan), that is
-noted. Where they come from preprints or experiment repos, the inferential
-weight should be calibrated accordingly.
+peer-reviewed publications, that is noted. Where they come from preprints
+or experiment repos, the inferential weight should be calibrated
+accordingly.
 
 ## The central question
 
@@ -34,34 +40,67 @@ schemas, structured coordination, and procedural knowledge capture.
 
 ### Agent coordination and state management
 
-The llmenron exchange (strangeloopcanon/llmenron) ran four waves of
-experiments stress-testing agent architectures. The findings were
-unambiguous: explicit state beats scratchpad memory, shared boards
-improve quality for both single and multi-agent setups, and actor
-identity eliminates unauthorized actions.
+The [LLMenron exchange](https://github.com/strangeloopcanon/llmenron)
+(repo experiment, not peer-reviewed) ran four waves of experiments
+stress-testing agent architectures. The findings were unambiguous:
+explicit state beats scratchpad memory, shared boards improve quality for
+both single and multi-agent setups, and actor identity eliminates
+unauthorized actions.
 
 These findings directly shaped PuranOS's use of OpenProject as the
 coordination substrate, the hybrid state model (OpenProject for
 long-running state, PostgreSQL for execution reliability), and the
 persona boundary enforcement model.
 
+A growing body of enterprise-specific benchmarks now tests agent
+performance on real business workflows:
+[WoW-bench](https://arxiv.org/abs/2601.22130) (preprint, Jan 2026)
+evaluates against 4,000+ ServiceNow business rules across 55 workflows;
+[Agent-Diff](https://arxiv.org/abs/2602.11224) (preprint, Feb 2026)
+benchmarks 224 enterprise API tasks with state-diff evaluation;
+[FireBench](https://arxiv.org/abs/2603.04857) (preprint, Mar 2026)
+tests enterprise instruction-following across 2,400+ samples. These
+benchmarks confirm that enterprise agent evaluation is maturing beyond
+toy tasks, though all three are preprints awaiting peer review.
+
 Detailed treatment: [Coordination and State](coordination-and-state.md)
 
 ### Schema'd state versus memory systems
 
 Research on enterprise AI memory systems consistently shows that
-structured, schema'd state outperforms unstructured memory.
-StructMemEval (2026 preprint) found that memory helps only when organized
-into task-appropriate structures. "Lost in the Middle" showed that retrieval
-degrades in long contexts. StateFlow showed that explicit state machines
-beat ReAct-style reasoning at lower cost.
+structured, schema'd state outperforms unstructured memory for domains
+with known ontologies — while memory remains appropriate for unstructured
+residue and conversational continuity.
+[StructMemEval](https://arxiv.org/abs/2602.11243) (February 2026
+preprint) found that memory helps only when organized into
+task-appropriate structures. [Lost in the Middle](https://arxiv.org/abs/2307.03172)
+(peer-reviewed) showed that retrieval degrades in long contexts.
+[StateFlow](https://arxiv.org/abs/2403.11322) (preprint) showed that
+explicit state machines beat ReAct-style reasoning at lower cost.
 
 These findings directly shaped PuranOS's "schema over memory" thesis:
 the enterprise's own tools and purpose-built schemas provide a better
 knowledge substrate than vector stores, key-value caches, or RAG
-systems.
+systems — schema first for structured enterprise state; memory for
+unstructured residue and conversational continuity.
 
 Detailed treatment: [Schema Over Memory](schema-over-memory.md)
+
+### Skills as expertise: mixed evidence
+
+[Voyager](https://arxiv.org/abs/2305.16291) (preprint) and [Agent
+Workflow Memory](https://arxiv.org/abs/2409.07429) (preprint) showed
+that procedural memory — reusable skills and workflows — outperforms
+episodic replay for cross-task generalization. However, newer benchmarks
+add important nuance: [SkillsBench](https://arxiv.org/abs/2602.12670)
+(preprint, Feb 2026) found that curated skills improve performance by
++16.2 percentage points across 84 tasks, but self-generated skills
+provide no benefit. [SWE-Skills-Bench](https://arxiv.org/abs/2603.15401)
+(preprint, work-in-progress, Mar 2026) tested 49 SWE skills and found an
+average improvement of only +1.2pp, with 39 of 49 skills showing zero
+improvement. The implication: skill curation and narrow targeting matter
+more than skill quantity. PuranOS's approach of domain-expert-curated
+skills aligns with this evidence.
 
 ### Counter-evidence PuranOS takes seriously
 
@@ -69,12 +108,18 @@ The research is not uniformly positive about multi-agent systems or AI
 coordination:
 
 - Multi-agent systems show high failure rates in studied deployments.
+  [Why Do Multi-Agent LLM Systems Fail?](https://openreview.net/forum?id=fAjbYBmonr)
+  (peer-reviewed, NeurIPS 2025 Datasets & Benchmarks spotlight)
+  catalogued 14 failure modes across 1,600+ traces.
 - Single agents can match multi-agent performance at lower cost in many
   scenarios.
-- 79% of production agent systems use manual prompt construction, not
-  frameworks.
-- The best model/config combination achieves only 70.8% on simpler
-  enterprise tasks.
+- [MAP](https://arxiv.org/abs/2512.04123) (2025 technical report)
+  surveyed 306 practitioners and 86 deployed systems: 79% use manual
+  prompt construction, not frameworks; 68% limit agents to 10 or fewer
+  steps.
+- [AgentArch](https://arxiv.org/abs/2509.10769) (2025 preprint) tested
+  18 architectures on enterprise tasks: the best model/config combination
+  achieves only 70.8% on simpler tasks and 35.3% on harder ones.
 
 PuranOS does not ignore this evidence. It responds with specific design
 choices: function-calling over ReAct, shallow workflows with human
@@ -88,7 +133,7 @@ counter-evidence sections.
 
 Each research document follows a consistent structure:
 
-1. The research finding and its source.
+1. The research finding and its source (with evidence tier tag).
 2. What it means for enterprise AI architecture.
 3. How PuranOS applies the finding.
 4. Counter-evidence and how PuranOS responds.

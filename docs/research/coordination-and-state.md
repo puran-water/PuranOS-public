@@ -13,12 +13,13 @@ This document presents the evidence.
 ---
 
 
-## The llmenron exchange
+## The LLMenron exchange
 
-The llmenron analysis (strangeloopcanon/llmenron) ran four progressive waves of
-experiments testing how agents coordinate, store state, and delegate work.
-The experiments used realistic scenarios with memory-dependent tasks, multi-turn
-conversations, and both single-agent and multi-agent configurations.
+The [LLMenron analysis](https://github.com/strangeloopcanon/llmenron) (repo
+experiment, not peer-reviewed) ran four progressive waves of experiments testing
+how agents coordinate, store state, and delegate work. The experiments used
+realistic scenarios with memory-dependent tasks, multi-turn conversations, and
+both single-agent and multi-agent configurations.
 
 
 ### Wave 1-2: Explicit state beats scratchpad
@@ -103,7 +104,7 @@ enforcement -- it is structural.
 
 ## Supporting literature
 
-### Generative Agents (Park et al., 2023)
+### Generative Agents (Park et al., 2023) — peer-reviewed
 
 Memory streams with observation, reflection, and planning produce coherent
 long-horizon agent behavior in simulated environments. Ablation study shows each
@@ -114,10 +115,11 @@ significantly.
 than memory streams. The PM tool provides observation (what tasks exist and their
 status), the persona provides reflection (domain-specific judgment), and skills
 provide planning (procedural workflows). The same functional decomposition,
-different implementation.
+different implementation. Note: this is a simulated-environment study; its
+applicability to enterprise production workflows is indirect.
 
 
-### StateFlow (Wu et al., 2024)
+### StateFlow (Wu et al., 2024) — [preprint](https://arxiv.org/abs/2403.11322)
 
 Explicit state machines for LLM agent workflows improve success rates by 13-28%
 at 3-5x lower cost compared to ReAct-style reasoning chains.
@@ -132,7 +134,7 @@ packages move through defined states (draft, active, review, done) rather than
 having agents reason about what state they are in.
 
 
-### Agent Workflow Memory (Wang et al., 2024)
+### Agent Workflow Memory (Wang et al., 2024) — [preprint](https://arxiv.org/abs/2409.07429)
 
 Reusable workflows extracted from successful task completions give 24.6-51.1%
 relative improvement on Mind2Web and WebArena benchmarks.
@@ -146,7 +148,7 @@ knowledge extracted from successful engineering work.
 See [Skills as Expertise](../approach/skills-as-expertise.md).
 
 
-### TapeAgents (Saveliev et al., 2024)
+### TapeAgents (Saveliev et al., 2024) — [preprint](https://arxiv.org/abs/2412.08445)
 
 Structured session logs as first-class artifacts: resumable state, debugging
 records, and training data. Sessions are not just logs -- they are replayable
@@ -157,7 +159,7 @@ tool calls, and side effects as structured data. These records serve the same
 function: debugging, audit, and potential future training.
 
 
-### LLM-Based Multi-Agent Blackboard System (2025)
+### LLM-Based Multi-Agent Blackboard System (2025) — [preprint](https://arxiv.org/abs/2510.01285)
 
 A shared blackboard (structured common workspace) shows 13-57% relative
 improvement over RAG-based and master-slave baselines in collaborative
@@ -174,7 +176,7 @@ tasks to industrial project coordination remains an architectural inference, not
 a directly demonstrated result.
 
 
-### Voyager (Wang et al., 2023)
+### Voyager (Wang et al., 2023) — [preprint](https://arxiv.org/abs/2305.16291)
 
 An ever-growing skill library with iterative self-verification produces large
 performance gains over stateless agent operation. Skills are code-based,
@@ -185,15 +187,72 @@ collection of procedural knowledge that compounds over time.
 See [Skills as Expertise](../approach/skills-as-expertise.md).
 
 
-### AWS Multi-Agent Collaboration
+### Skills benchmarks: curated helps, self-generated does not
 
-Production multi-agent system achieving up to 90% goal success with 23% lift
-from payload referencing (passing structured data between agents rather than
-free-text summaries) and latency reduction from dynamic routing.
+Two recent preprints add important nuance to the skills-as-expertise narrative:
 
-**Relevance:** Validates that structured payloads between agents (which PuranOS
-achieves via schema'd state in OpenProject and plant-state) outperform free-text
-handoffs.
+**[SkillsBench](https://arxiv.org/abs/2602.12670) (preprint, Feb 2026)** tested
+84 tasks and found that curated skills improve agent performance by +16.2
+percentage points. However, self-generated skills provide no measurable benefit.
+The quality and targeting of skill curation matters more than the volume of
+skills available.
+
+**[SWE-Skills-Bench](https://arxiv.org/abs/2603.15401) (preprint,
+work-in-progress, Mar 2026)** tested 49 SWE skills and found an average
+improvement of only +1.2pp, with 39 of 49 skills showing zero improvement. This
+suggests that broadly defined skills do not reliably transfer; narrow, precisely
+targeted skills are what help.
+
+**PuranOS response:** PuranOS skills are domain-expert-curated, not
+self-generated. They are narrow (a skill for sizing an MLE bioreactor, not a
+generic "engineering" skill) and tested against specific task outcomes. The
+SkillsBench and SWE-Skills-Bench findings reinforce that this curation discipline
+is load-bearing, not optional.
+
+
+---
+
+
+## Enterprise-specific benchmarks
+
+A growing set of benchmarks now evaluates agent performance on realistic
+enterprise workflows rather than toy tasks. All three below are preprints
+awaiting peer review.
+
+### WoW-bench (Jan 2026) — [preprint](https://arxiv.org/abs/2601.22130)
+
+ServiceNow-based benchmark with 4,000+ business rules, 55 workflows, and 234
+tasks. Tests whether agents can navigate real enterprise configuration
+complexity, including business rule interactions, approval chains, and
+conditional logic.
+
+**Relevance:** The closest existing benchmark to PuranOS's operating domain.
+Enterprise agent systems must handle business rules that interact in non-obvious
+ways — the same challenge PuranOS faces with OpenProject workflow configurations,
+CMMS approval chains, and procurement rules.
+
+
+### Agent-Diff (Feb 2026) — [preprint](https://arxiv.org/abs/2602.11224)
+
+Enterprise API benchmark with 224 tasks using state-diff evaluation: instead of
+checking only the final answer, it compares the full state change produced by
+agent actions against the expected state change. This catches agents that produce
+correct outputs through incorrect state mutations.
+
+**Relevance:** State-diff evaluation aligns with PuranOS's architecture. Because
+PuranOS agents write to schema'd applications (OpenProject, CMMS, procurement),
+every agent action produces a verifiable state change. The execution ledger
+captures these transitions for audit.
+
+
+### FireBench (Mar 2026) — [preprint](https://arxiv.org/abs/2603.04857)
+
+Enterprise instruction-following benchmark with 2,400+ samples testing whether
+agents follow complex, multi-step enterprise instructions accurately.
+
+**Relevance:** Enterprise workflows require precise instruction-following — not
+creative problem-solving. PuranOS skills encode these instructions as structured
+procedures, reducing the burden on the model's instruction-following capability.
 
 
 ---
@@ -205,12 +264,13 @@ The research is not uniformly positive. PuranOS takes the following
 counter-evidence seriously.
 
 
-### "Why Do Multi-Agent LLM Systems Fail?" (2025)
+### "Why Do Multi-Agent LLM Systems Fail?" (NeurIPS 2025, Datasets & Benchmarks spotlight) — [peer-reviewed](https://openreview.net/forum?id=fAjbYBmonr)
 
-Studies multiple multi-agent frameworks and reports high failure rates (41% to
-86.7%) across evaluated SOTA open-source multi-agent systems. These are
-benchmarked MAS traces, not a universal statement about all production
-multi-agent systems. Dominant failure modes:
+Studies multiple multi-agent frameworks using the MAST-Data dataset of 1,600+
+traces and identifies 14 failure modes. Reports high failure rates (41% to 86.7%)
+across evaluated SOTA open-source multi-agent systems. These are benchmarked MAS
+traces, not a universal statement about all production multi-agent systems.
+Dominant failure modes:
 
 - **Cascading errors.** One agent's mistake propagates through the system.
 - **Ambiguous task boundaries.** Agents duplicate work or leave gaps.
@@ -252,14 +312,16 @@ They are doing different tasks with different tools. The value comes from
 specialization and boundary discipline, not from ensemble effects.
 
 
-### MAP: Measuring Agents in Production (2025)
+### MAP: Measuring Agents in Production (2025) — [technical report](https://arxiv.org/abs/2512.04123)
 
-Survey of production agent deployments (with varying sample bases per finding) reports:
+Survey of 306 practitioners and 86 deployed production agent systems. Key
+findings:
 
 | Finding | Percentage | Sample base |
 |---|---|---|
 | Use manual prompt construction (not frameworks) | 79% | Survey respondents |
 | Limit agents to 10 or fewer steps | 68% | Survey respondents |
+| Use off-the-shelf models (not fine-tuned) | 70% | Survey respondents |
 | Use no agent frameworks (LangChain, CrewAI, etc.) | 85% | 17 of 20 production case studies |
 | Rely on human-in-the-loop evaluation | 74% | Survey respondents |
 
@@ -272,14 +334,14 @@ what order. Workflows are shallow (typically 5-10 steps). No agent frameworks
 are used. Human review gates are explicit (the accountable role in OpenProject).
 
 
-### AgentArch (2025)
+### AgentArch (2025) — [preprint](https://arxiv.org/abs/2509.10769)
 
-The best model/configuration combination achieves only 70.8% on the simpler
-time-off task and 35.3% on the harder customer-routing task. Multi-agent ReAct
-configurations perform especially poorly. However, the paper shows
-model-specific preferences — GPT-4.1-mini had single-agent ReAct settings that
-beat some function-calling settings — so the relationship between architecture
-and performance is not universal.
+Tests 18 architectures across enterprise tasks. The best model/configuration
+combination achieves only 70.8% on the simpler time-off task and 35.3% on the
+harder customer-routing task. Multi-agent ReAct configurations perform especially
+poorly. However, the paper shows model-specific preferences — GPT-4.1-mini had
+single-agent ReAct settings that beat some function-calling settings — so the
+relationship between architecture and performance is not universal.
 
 **PuranOS response:** PuranOS uses function-calling, not ReAct. Agents call
 typed MCP tools directly rather than reasoning through chains of thought about
@@ -316,15 +378,18 @@ is a board operation. There is no message bus, no pub/sub, no agent-to-agent
 RPC. Agents read the board, do their work, and write results back to the board.
 
 
-### 3. Procedural memory over episodic memory
+### 3. Procedural memory over episodic memory (with curation)
 
 Reusable workflows outperform replay of past interactions for cross-task
 generalization. An agent with a skill library outperforms an agent with a
-conversation history.
+conversation history. However, skill quality matters: curated skills help
+(+16.2pp per [SkillsBench](https://arxiv.org/abs/2602.12670)), while
+self-generated skills and broadly targeted skills show little to no benefit
+([SWE-Skills-Bench](https://arxiv.org/abs/2603.15401)).
 
 PuranOS skills encode procedural knowledge as executable instructions. They are
-versioned, composable, and domain-specific. They are not recordings of past
-sessions -- they are distilled expertise.
+versioned, composable, domain-specific, and expert-curated. They are not
+recordings of past sessions -- they are distilled expertise.
 See [Skills as Expertise](../approach/skills-as-expertise.md).
 
 
@@ -350,12 +415,12 @@ in the literature are common in production agent systems.
 
 | Failure mode | Frequency in literature | PuranOS mitigation |
 |---|---|---|
-| Cascading errors | 41-87% failure rate in evaluated SOTA MAS | Persona boundaries, schema validation |
-| Ambiguous task boundaries | Dominant failure mode | Explicit delegation via OpenProject |
+| Cascading errors | 41-87% failure rate in evaluated SOTA MAS ([source](https://openreview.net/forum?id=fAjbYBmonr)) | Persona boundaries, schema validation |
+| Ambiguous task boundaries | Dominant failure mode (14 modes catalogued) | Explicit delegation via OpenProject |
 | Hallucination propagation | Observed across all systems | Schema'd state, typed tool outputs |
 | Memory inconsistency | Observed across all systems | Single source of truth (OpenProject + PostgreSQL) |
-| Unauthorized actions | 33% without identity | Actor identity on board |
-| Framework overhead | 85% of production case studies avoid (17/20) | No frameworks, direct MCP tool calls |
+| Unauthorized actions | 33% without identity ([source](https://github.com/strangeloopcanon/llmenron)) | Actor identity on board |
+| Framework overhead | 85% of production case studies avoid (17/20) ([source](https://arxiv.org/abs/2512.04123)) | No frameworks, direct MCP tool calls |
 
 The pattern is consistent: in the studied settings, systems that treat coordination
 as a prompt engineering problem perform poorly. Systems that treat coordination as a
