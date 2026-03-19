@@ -154,6 +154,7 @@ auditable calculation chains.
 | RAG over documents | None (chunked text) | Medium (re-indexing) | Retrieval-only, no write path | Hallucination, staleness |
 | Custom knowledge graph | Manual definition | Very high | Custom adapters | Schema drift, maintenance burden |
 | Palantir-style unification | Retrofitted over existing systems | Enormous (ongoing reconciliation) | Platform-locked | Multi-year, multi-million-dollar projects |
+| Governed identity (PuranOS) | Canonical registry from day one | Near-zero (registry + lifecycle hooks) | Native (same MCP surface as all tools) | None — identity IS the schema |
 
 The critical difference is the maintenance burden. Enterprise OSS schemas are
 maintained by their upstream communities. Purpose-built engineering schemas
@@ -165,34 +166,47 @@ curation."
 ---
 
 
-## The "Palantir problem" this avoids
+## Governed identity from day one
 
-Large industrial firms with decades of ad-hoc cobbled-together systems
-eventually face a reckoning: unifying data models, reconciling schemas, building
-integration layers. This is the work that Palantir Foundry, OSIsoft PI, and
-similar platforms are hired to do — at enormous cost, over multi-year timelines,
-with uncertain outcomes.
-
-The cost comes from retrofitting an ontology over systems that were never
-designed to share one. A typical scenario: the maintenance team uses one system,
+The classic industrial data problem: the maintenance team uses one system,
 engineering uses another, procurement uses a third, and none of them agree on
 what an "equipment item" is. The equipment tag in the CMMS does not match the
-line item in the ERP which does not match the asset in the P&ID. Reconciling
-these is a manual, error-prone, never-finished project.
+line item in the ERP which does not match the asset in the P&ID. Large firms
+spend millions on Palantir Foundry, OSIsoft PI, and similar platforms to
+retrofit an ontology over systems that were never designed to share one.
 
-PuranOS avoids this by starting with the ontology. The self-hosted enterprise
-tools each bring their own validated domain model. The engineering schemas
-define the domain from day one. The custom schemas are designed for their
-specific domains. There is no future "unification project" because the ontology
-exists by construction — it is the schema of the tools themselves.
+PuranOS starts with the ontology. Every enterprise tool is self-hosted
+open-source software with an inspectable, forkable Postgres schema. Every
+engineering entity has a governed identity from the moment it first appears on
+a drawing. The equipment identity registry — a dedicated database and MCP
+server surface — implements ISO 14224's functional-position / physical-asset
+two-layer model:
 
-This is not a theoretical advantage. It is the difference between a greenfield
-firm that builds its digital infrastructure correctly from the start and an
-established firm that must later pay for years of ad-hoc decisions.
+- **Functional position**: the slot in the plant (ISA 5.1 tag + UUID).
+  Permanent. Survives physical replacements.
+- **Physical asset instance**: the thing installed at that slot (CMMS ID +
+  serial number). Replaceable. Tracks maintenance history.
 
-For a small design-build-operate firm, the window to get this right is now —
-before decades of ad-hoc tooling create the problem that Palantir charges
-millions to partially solve.
+When engineering draws P-001 on a P&ID, the position is registered. When
+procurement awards a vendor quote, the lifecycle advances. When maintenance
+commissions the physical pump, the asset instance links to the position. One
+governed master identity connects every system — not through ad-hoc
+point-to-point mappings, but through a canonical registry that every MCP server
+can resolve.
+
+Self-hosting is load-bearing here. When the CMMS needed a native
+`equipment_tag` field on its Asset entity, we forked the open-source codebase,
+added the column and a Liquibase migration, and deployed the custom build in
+under a minute. With a SaaS vendor, that request enters a feature backlog and
+ships on someone else's timeline — if at all. The ability to modify the schema
+when the ontology demands it is what makes governed identity practical, not
+theoretical.
+
+This is the positive thesis: not "we avoid Palantir's problem" but "we build
+the identity infrastructure that makes cross-system resolution a solved problem
+from day one." A firm that starts with schema'd tools and governed identity
+never accumulates the integration debt that forces incumbents into multi-year
+unification projects.
 
 
 ---

@@ -118,6 +118,31 @@ The equipment-item schema defines:
 - **Materials**: wetted material, construction material, lining
 - **Costing**: optional costing metadata
 
+### Equipment identity: functional position vs physical asset
+
+Equipment identity has two layers, following ISO 14224 and ISO 55000:
+
+**Functional position** — the slot in the plant. Named by the ISA 5.1 tag (e.g., P-001), identified by an immutable UUID (`equipment_uid`). When P-001's pump is replaced, the position stays; the physical asset changes. Positions carry lifecycle stage (design → procurement → construction → commissioning → operations → decommissioned) and cross-system links to the DEXPI model, OpenProject work package, and procurement datasheet.
+
+**Physical asset instance** — the thing installed at that position. Tracked by CMMS asset ID and serial number. When the pump fails and is replaced, the old instance is decommissioned, a new one is commissioned at the same position.
+
+This separation resolves a common industrial data problem: the P&ID tag, the CMMS asset ID, the procurement quote, and the ERP line item all reference different aspects of the same equipment. The tag names the position. The CMMS ID tracks the physical thing. The UUID is the governed master identity that connects them.
+
+```
+Functional Position (equipment_uid)
+├── current_tag: "P-001"          ← ISA 5.1 (mutable via rename with history)
+├── lifecycle_stage: "operations"  ← advances through project phases
+├── dexpi_model_id                 ← engineering-mcp P&ID model
+├── openproject_wp_id              ← construction/commissioning task
+└── Current Asset Instance
+    ├── cmms_asset_id: 42          ← Atlas CMMS maintenance record
+    ├── serial_number: "SN-12345"  ← nameplate
+    ├── manufacturer: "Rashi"
+    └── vendor_quote_id: 17        ← procurement origin
+```
+
+The identity registry is a dedicated database with its own MCP server surface (`equipment-identity-mcp`), not embedded in any single application's schema. This is intentional: equipment identity spans every domain — design, procurement, construction, operations, disposition — and no single application should own it. The registry is the governed translation layer. The anti-pattern is not having a translation layer; it is having ad-hoc, uncontrolled point-to-point mappings scattered across systems.
+
 ### Instrumentation and control
 
 ISA 5.1 loop schemas define instrumentation:
@@ -271,9 +296,12 @@ Where each major entity type originates and where it flows:
 | Entity | Origin Source | Produced By | Consumed By |
 |---|---|---|---|
 | Work package | Enterprise OSS (OpenProject) | Project management agents | All agents (task coordination) |
+| Equipment position | Equipment identity registry | PE lead (at P&ID digitization) | All agents (cross-system resolution) |
+| Asset instance | Equipment identity registry | Maintenance (at commissioning) | CMMS, procurement, inventory |
 | Equipment item | Engineering schema | Engine MCP servers (sizing) | Procurement, costing, P&ID generation |
 | Plant-state stream | Engineering schema | Engine MCP servers (simulation), written as filesystem JSON | Downstream engines, reports, deliverable generation |
 | Cost observation | Custom domain (procurement) | Procurement agents | Estimating, bid evaluation |
+| Process datasheet | Custom domain (procurement) | Procurement agents, O&M manual ingestion | Maintenance, operations |
 | Artifact envelope | Engineering schema | Any deliverable-producing tool | Version tracking, dependency resolution |
 | Model credibility | Engineering schema | Engine MCP servers | Decision-support agents |
 | BOM entry | Enterprise OSS (InvenTree) | Equipment agents | Procurement, inventory |
