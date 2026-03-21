@@ -79,8 +79,8 @@ generation, `office-mcp` for email (as `engineering.agent@circleh2o.com`),
 and `rlm-bridge` for document review sessions. Creates child work
 packages in OpenProject and assigns them to specialist personas.
 
-Stream state data flows between agents via filesystem JSON files at
-`{project_dir}/mcp-outputs/streams/`. pe-lead reads these directly.
+Stream state is Postgres-primary, stored in the `stream_snapshot` table
+via engineering-mcp tools. pe-lead queries stream data through typed tool calls.
 
 pe-lead does not size equipment. It frames the problem and delegates.
 
@@ -177,9 +177,9 @@ are simply not available to the wrong persona.
   └── openproject-mcp        (task coordination)
 ```
 
-Stream state (formerly plant-state MCP) is now filesystem-based:
-agents read and write JSON files at `mcp-outputs/streams/` using
-the `plant-state-skill` conventions.
+Stream state is Postgres-primary via the `stream_snapshot` table in
+engineering-mcp. The `plant-state-skill` provides the workflow SOP for
+stream reasoning; filesystem JSON export is available but not the durable store.
 
 No amount of prompt injection can give pe-process access to
 procurement-mcp. The server is not in its configuration.

@@ -27,7 +27,7 @@ This public repo documents that architecture without exposing private infrastruc
 
 ### Engineering and Technical Delivery
 
-- process engineering workflows for aerobic and anaerobic treatment, RO, IX, evaporation, degassing, corrosion, hydraulics, and plant-state reasoning
+- process engineering workflows for aerobic and anaerobic treatment, RO, IX, evaporation, degassing, corrosion, hydraulics, and stream-state reasoning
 - multi-interface engineering engines built around QSDsan and WaterTAP
 - shared engineering utilities for converters, heuristics, and model handoff
 - reusable skills that turn specialist engineering workflows into repeatable operating procedures

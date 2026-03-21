@@ -343,7 +343,8 @@ All three sources converge on a canonical set of shared schemas that define the 
 │             model-credibility                            │
 │       Instrumentation: alarm . C&E . instruments         │
 │       Engineering: hydraulic . control . HAZOP           │
-│       Compliance: water-compliance . project-controls    │
+│       Compliance: water-compliance                       │
+│       Project Controls: project-controls                 │
 │       Exchange: 5 Ensaras handover contracts             │
 │       Retained: artifact-envelope . taxonomy . tags      │
 │                          |                               │
@@ -399,7 +400,7 @@ Where each major entity type originates and where it flows:
 | Equipment position | Equipment identity registry | PE lead (at P&ID digitization) | All agents (cross-system resolution) |
 | Asset instance | Equipment identity registry | Maintenance (at commissioning) | CMMS, procurement, inventory |
 | Equipment item | Engineering schema | Engine MCP servers (sizing) | Procurement, costing, P&ID generation |
-| Stream state | Engineering schema | Engine MCP servers (simulation), Postgres-primary via stream_snapshot | Downstream engines, reports, deliverable generation |
+| Stream state (formerly plant-state) | Engineering schema | Engine MCP servers (simulation), Postgres-primary via stream_snapshot | Downstream engines, reports, deliverable generation |
 | Cost observation | Custom domain (procurement) | Procurement agents | Estimating, bid evaluation |
 | Process datasheet | Custom domain (procurement) | Procurement agents, O&M manual ingestion | Maintenance, operations |
 | Artifact envelope | Engineering schema | Any deliverable-producing tool | Version tracking, dependency resolution |

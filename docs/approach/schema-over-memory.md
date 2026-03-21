@@ -315,7 +315,7 @@ stored, how it was chunked, and whether the retrieval finds the right context.
 
 With PuranOS's schema approach, the agent:
 
-1. Queries the plant-state schema for the current stream composition
+1. Queries the stream-state schema for the current stream composition
 2. Calls the WaterTAP engine with typed parameters to run the RO simulation
 3. Gets back results with explicit model credibility metadata
 4. Queries the procurement schema for vendor quotes on RO membranes
