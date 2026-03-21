@@ -117,6 +117,41 @@ agent modified this vendor record, when, and in response to what task" from
 structured logs.
 
 
+## Why this gets used
+
+Enterprise software adoption fails primarily because the system of record and
+the system of work are different systems. People work in email, conversation,
+and personal tools. They are asked to transcribe into a structured system that
+serves someone else's reporting needs. Every transcription step is where shadow
+processes form — the personal spreadsheet, the text to a colleague, the
+whiteboard note that actually runs the operation while the official system
+collects dust.
+
+PuranOS eliminates the transcription step. The primary interaction surface is
+natural language — email and messaging channels that people already use. AI
+agents handle structured capture. A field technician emails that they replaced a
+bearing on 340-P-01A; the communication agent creates the typed work order,
+links the equipment tag, logs the hours, and flags the failure mode. The
+technician's path of least resistance *is* the system of record.
+
+**Agents are the most reliable users.** AI agents execute defined workflows,
+update task state, produce typed artifacts, and log results — every time. No
+shortcuts, no "I'll update it later," no personal spreadsheet on the side. Data
+quality is inversely proportional to the number of structured-data-entry
+touchpoints that require human discipline.
+
+**The residual risk is interpretation, not compliance.** If the agent
+consistently misclassifies equipment or picks the wrong work order type, users
+lose trust and shadow processes re-emerge from accuracy distrust. The mitigation
+is the approval-gate pattern: agents draft structured records, humans confirm or
+correct in-channel before commit.
+
+**Shadow processes are system bugs, not user bugs.** When work happens outside
+the schema'd substrate, the first question is what the system failed to
+capture — not who failed to use it. The response is to fix the system, not
+monitor the user.
+
+
 ## What this is not
 
 | Claim | Why it does not apply |

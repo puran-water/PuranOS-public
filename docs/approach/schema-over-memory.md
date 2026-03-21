@@ -13,6 +13,14 @@ the memory of what maintenance was done. When a project manager creates an
 opportunity in the CRM, that IS the memory of the commercial relationship. A
 separate "memory layer" is architecturally redundant.
 
+Schema'd state is the authority for canonical objects — equipment, streams,
+tasks, costs. When unstructured documents matter — vendor submittals, permits,
+field reports — they are served via document management with IDs linked from
+schema'd records, so retrieval always returns evidence tied to the object it
+concerns, not floating chunks of text. The pattern is not "schema instead of
+retrieval" but "schema for canonical state, retrieval for evidentiary context,
+with explicit joins between them."
+
 PuranOS assembles its ontology from three source types. Each brings schema —
 validated, typed, Postgres-backed — not free-form text.
 
