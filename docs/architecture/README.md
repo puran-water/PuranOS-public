@@ -46,7 +46,7 @@ Two especially important engineering engines now follow the same broad pattern:
 - QSDsan as a multi-interface biological/process simulation engine
 - WaterTAP as a session-persistent orchestration engine for treatment and costing workflows
 
-Both increasingly rely on `libs/engineering-utils/` for shared bridge logic, converters, and downstream handoff semantics.
+Both increasingly rely on `libs/engineering-utils/` for shared bridge logic, converters, and downstream handoff semantics. That library now provides 16 contract schemas (from 12 model modules) covering engineering, instrumentation, compliance, project controls, and inter-system exchange — generated from Pydantic models and published as JSON Schema with canonical URIs at `puranwater.com/schemas/`.
 
 See [MCP Servers](mcp-servers/README.md).
 

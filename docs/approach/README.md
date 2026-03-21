@@ -31,7 +31,7 @@ reducing the need for separate AI "memory" systems. The ontology comes from thre
 | Source | Examples | What it provides |
 |--------|----------|-----------------|
 | Enterprise OSS schemas | OpenProject, CRM, inventory, CMMS | Postgres-backed domain ontology per vertical |
-| Purpose-built engineering schemas | 31-component plant-state model, ~110 process unit types, ISA 5.1 instrumentation, DEXPI equipment classes, model credibility metadata | Typed engineering objects with known relationships |
+| Shared Pydantic contract schemas | 16 generated schemas: stream-state, equipment-item (OPC UA DI/AAS), model-credibility, alarm definitions (ISA-18.2), cause-effect matrices (ISA-5.2), instrument databases, hydraulic profiles, control execution (ISA-88), HAZOP (IEC 61882), water compliance (NPDES), project controls (EIA-748), 5 Ensaras exchange contracts | Typed engineering objects with known relationships and standards-aligned vocabulary |
 | Custom domain schemas | Procurement (12-entity relational model), bid spec review (structured evidence chains), compliance (validated regulatory calculations) | Domain logic that no off-the-shelf tool covers |
 
 All exposed via typed MCP tool surfaces. An agent does not need to
@@ -165,9 +165,14 @@ PuranOS does not invent ontologies where industry consensus already exists.
 |--------|----------|-------------------|
 | P&ID data exchange | DEXPI (ISO 15926 profile) | Equipment classes, piping, and instrumentation use DEXPI enumerations directly |
 | Equipment hierarchy | ISA-95 / IEC 62264 | Area → Unit → Equipment Module → Control Module |
-| Instrumentation | ISA 5.1 | Tag format, function groups, instrument letter codes |
+| Instrumentation | ISA 5.1, ISA-5.2, IEC 62424 | Tag format, function groups, instrument letter codes, cause-effect matrices |
+| Alarm management | ISA-18.2 | Rationalized alarm definitions with priority, deadband, and rationalization fields |
+| Batch/sequence control | ISA-88, IEC 61131-3 | Process segments, control loops, interlocks, PLC programs |
+| Safety studies | IEC 61882, IEC 61511 | HAZOP nodes/deviations, LOPA scenarios with SIL ratings |
 | Capital handover | CFIHOS | Equipment attributes, nameplate data, materials of construction |
-| Automation models | OPC UA | Tag/signal typing, node-reference semantics |
+| Device identity | OPC UA DI, IDTA AAS | Equipment nameplate, simulation model provisioning metadata |
+| Regulatory reporting | NPDES, 40 CFR 122/123 | Permit conditions, monitoring results, DMR field vocabulary |
+| Earned value | ANSI/EIA-748 | PV, EV, AC, CPI, SPI, cash flow forecasts, contingency drawdowns |
 
 Where no standard exists (e.g., model credibility metadata, procurement
 ontology, agent task delegation), PuranOS defines its own schemas and

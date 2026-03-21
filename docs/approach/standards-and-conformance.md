@@ -24,7 +24,18 @@ speaks the same language as the rest of the industry.
 | ISA 5.1 | Instrument identification and tagging | Loop, instrument, and tag schemas encode ISA 5.1 function groups. Tag format schema enforces the area-code-sequence pattern. Instrument types carry ISA 5.1 letter codes. |
 | ISO 14224 / ISO 55000 | Equipment reliability and asset management | Equipment identity uses the ISO 14224 functional-position / physical-asset-instance two-layer model. Functional positions (ISA 5.1 tag + UUID) persist across physical replacements. Asset instances carry CMMS ID, serial number, and maintenance history. The equipment identity registry is the governed master that connects P&ID, CMMS, procurement, and project management systems. |
 | CFIHOS | Capital facilities handover information | Equipment position and asset instance tables implement core CFIHOS capital handover attributes: functional location, tag, lifecycle stage, manufacturer, model, serial number, commissioning date, and procurement origin. Process datasheets extend coverage with materials of construction, design conditions, and nameplate data. The CFIHOS Starter Class Library (equipment class hierarchy, properties per tag type) is used as reference for designator taxonomy and datasheet field validation. |
-| OPC UA | Machine-readable automation information models | Tag and signal typing in the component-tag schema is intended to align with OPC UA concepts. Signal type classifications (analog input, digital output, calculated) follow OPC UA variable type semantics where applicable. |
+| OPC UA DI | Device identity and automation information models | Equipment-item schema includes OPC UA DI nameplate fields (manufacturer, model, serial number, product code, device class, hardware/software revision). Tag and signal typing follows OPC UA variable type semantics. |
+| ISA-18.2 | Alarm management lifecycle | Alarm-definition schema uses ISA-18.2 vocabulary: alarm types, priorities, rationalization fields, deadband/delay parameters, probable cause, consequence, and operator response. |
+| ISA-5.2 | Binary logic diagrams, cause-and-effect | Cause-effect-matrix schema implements ISA-5.2 sparse matrix representation with standard mark types (X, T, D, A, S). |
+| ISA-88 / IEC 61512 | Batch control, recipe/procedure hierarchy | Control-execution-package implements process segments, procedures, and recipe hierarchy for sequential and batch control. |
+| IEC 62424 | Instrumentation in process control documentation | Instrument-database schema structures loops, instruments, and IO signals per IEC 62424 document model. Cause-effect matrices follow IEC 62424 representation conventions. |
+| IEC 61131-3 | PLC programming languages | Control-execution-package includes POU (Program Organization Unit) types and task binding models for PLC program structure. |
+| IEC 61882 | HAZOP study procedure | Hazop-study-package implements the HAZOP vocabulary: nodes, deviations (guideword + parameter), causes, consequences, safeguards, and actions. |
+| IEC 61511 | Functional safety (SIS) | LOPA scenarios in the HAZOP schema carry IPL credit factors and SIL ratings per IEC 61511 / CCPS practice. |
+| IDTA AAS | Asset Administration Shell (digital nameplate) | Equipment-item includes AAS nameplate fields. Model-credibility includes AAS "Provision of Simulation Models" fields (license, environment, parameterization method). |
+| BCF-XML | Issue/defect exchange (buildingSMART) | Capex-improvement-request uses BCF-XML semantics for viewpoints, issue structure, and document references. |
+| ANSI/EIA-748 | Earned value management | Project-controls-package implements EV vocabulary: PV, EV, AC, CPI, SPI, TCPI, EAC, ETC, VAC, cash flow forecasts, and contingency drawdowns. |
+| NPDES / 40 CFR 122-123 | Water discharge permits | Water-compliance-package uses NPDES/DMR vocabulary for permit conditions, monitoring results, exceedance events, and regulatory submissions. |
 
 ---
 
@@ -36,23 +47,51 @@ entity model that all tools and agents must speak.
 
 ### Engineering schemas
 
+#### Generated from Pydantic models (16 schemas)
+
 | Schema | Standards Alignment | What It Defines |
 |---|---|---|
-| Plant-state | Custom (mASM2d component basis) | 31-component process stream model with flow, temperature, pressure, pH, component concentrations, and computed aggregates |
-| Equipment-item | ISA-95-inspired hierarchy | Equipment with tag, type code, quantity, capacity, driver, materials, dimensions, and costing fields |
+| Stream-state (formerly Plant-state) | OPC UA AnalogItem, IDTA AAS Time Series, ISO 15926 | 31-component process stream with flow, T, P, pH, aggregates |
+| Equipment-item | OPC UA DI, IDTA AAS, ISA-95, ISO 14224, CFIHOS | Equipment identity, nameplate, sizing, materials, costing |
+| Model-credibility | IDTA AAS Simulation Models | Model status, decision grade, validation basis, license, parameterization |
+| Alarm-definition | ISA-18.2 | Rationalized alarms: tag, setpoint, priority, deadbands, rationalization |
+| Cause-effect-matrix | ISA-5.2, IEC 62424 | Sparse C&E matrix with standard mark types (X, T, D, A, S) |
+| Instrument-database | ISA-5.1, DEXPI, IEC 62424 | Instrument index + IO list: loops, instruments, device specs, signals |
+| Hydraulic-profile | Engineering practice | Node-by-node HGL/EGL with gravity feasibility validation |
+| Control-execution-package | ISA-88, ISA-95, IEC 61131-3 | Process segments, control loops, interlocks, sequences, PLC programs |
+| Hazop-study-package | IEC 61882, IEC 61511 | HAZOP nodes/deviations with LOPA scenarios and IPL credit factors |
+| Water-compliance-package | NPDES, 40 CFR 122/123 | Facilities, discharge points, permits, monitoring, exceedances |
+| Project-controls-package | ANSI/EIA-748 | EV baselines/snapshots, cash flow forecasts, contingency drawdowns |
+| Commissioning-handover-package | IDTA AAS, ISA-95, ISO 14224 | One-time handover: equipment registry, spare parts, baselines |
+| Process-performance-summary | ISA-95 | Monthly operational metrics per equipment |
+| Maintenance-history-exchange | ISO 14224 | Completed work orders from CMMS |
+| Compliance-status-exchange | NPDES/DMR | Permit compliance status per discharge point |
+| Capex-improvement-request | BCF-XML | Improvement requests with viewpoints and cost estimates |
+
+#### Retained YAML schemas (not yet generated from Pydantic)
+
+| Schema | Standards Alignment | What It Defines |
+|---|---|---|
 | Component-tag | ISA 5.1 | Sub-equipment components (motors, VFDs, bearings, seals) with typed attributes |
 | Tag-format | ISA 5.1 | Area-code-sequence-suffix pattern validation |
 | Process-unit-taxonomy | ISA-95 hierarchy | ~110 unit types across 8 treatment areas with function and equipment expectations |
 | Loop | ISA 5.1 | Instrumentation loops with function group encoding, instrument lists, control group assignments |
-| Line-list | DEXPI piping | Piping line designations with service, material, size, rating, and insulation |
-| Valve-schedule | DEXPI valves | Valve types, sizes, actuators, failure positions, and service conditions |
+| Line-list | PIP PIC001, ISO 10628 | Piping line designations with service, material, size, rating, and insulation |
+| Valve-schedule | API 6D, IEC 62424 | Valve types, sizes, actuators, failure positions, and service conditions |
 | Artifact-envelope | Custom | Typed deliverables with version, dependencies, conformance claims, and approval status |
-| Model-credibility | Custom | Model status, decision grade, and validation basis (5 x 4 x 5 matrix) |
 
 These schemas do not attempt to implement the full scope of any standard. They
 implement the subset that matters for the work PuranOS does -- process engineering
 design for industrial wastewater treatment. The goal is interoperability with industry
 practice, not exhaustive compliance.
+
+### Schema generation and canonical URIs
+
+Pydantic models are the source of truth. JSON Schema files are generated with canonical
+`$id` URIs at `https://puranwater.com/schemas/{filename}`. This makes schemas
+machine-linkable and version-controlled from a single Python source. Non-Python
+consumers (schema validators, documentation generators, exchange partners) use the
+generated JSON Schema files.
 
 ---
 
@@ -166,8 +205,11 @@ When conformance is machine-checkable, several things become possible:
 
 Standards alignment is about data semantics and interoperability. It does not address:
 
-- **Regulatory compliance** -- 40 CFR, state permits, NPDES requirements. See the
-  compliance workspace for regulatory coverage.
+- **Regulatory interpretation** -- determining whether a facility is in compliance,
+  or what specific permit limits should be. Standards alignment now covers the data
+  vocabulary for regulatory reporting (NPDES permit structure, DMR field names via the
+  water-compliance-package schema), but compliance determination remains a domain
+  logic concern, not a schema concern.
 - **Calculation standards** -- Ten States Standards, WEF MOPs, TR-16. These inform
   engineering logic in the simulation engines, not schema structure.
 - **Drawing standards** -- ASME Y14.5, company-specific CAD standards. PuranOS

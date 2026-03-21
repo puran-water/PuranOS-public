@@ -45,9 +45,9 @@ The `processeng-workspace` contains the bulk of the domain-specific engineering 
 - WaterTAP- and QSDsan-oriented development work
 - discipline-specific design servers such as degassers, evaporators, RO, IX, and more
 
-Plant state (process stream data) is managed via filesystem JSON files and the `plant-state-skill`, not as an MCP server. Stream state files at `mcp-outputs/streams/` conform to the plant-state schema and are validated by engineering-utils Pydantic models.
+Stream state (process stream data) is Postgres-primary, stored in the `stream_snapshot` table via engineering-mcp tools. Filesystem JSON export is available for local tooling but is not the durable store. The `plant-state-skill` provides the workflow SOP for stream reasoning.
 
-This is supported by shared utilities in `libs/engineering-utils/`.
+This is supported by shared utilities in `libs/engineering-utils/`, which provides 16 contract schemas (from 12 model modules) as Pydantic models with generated JSON Schema mirrors.
 
 Two worktree themes are especially important now:
 

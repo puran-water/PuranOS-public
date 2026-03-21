@@ -64,11 +64,11 @@ Each MCP server exposes a curated subset of the application's full schema. The s
 
 Industrial process engineering has its own ontology that no off-the-shelf software provides. A CRM does not know what a process stream is. A PM tool does not know what model credibility means. An inventory system does not distinguish between a centrifugal pump and a positive displacement pump at the process engineering level.
 
-PuranOS defines this ontology explicitly through shared schemas. These schemas live in `libs/engineering-utils/` as Pydantic models with JSON Schema mirrors at `skills/shared/schemas/`.
+PuranOS defines this ontology explicitly through shared Pydantic contract schemas. These live in `libs/engineering-utils/` as Pydantic models; JSON Schema mirrors are generated with canonical `$id` URIs at `https://puranwater.com/schemas/`. Source 2 has expanded from classical engineering schemas to cover instrumentation, compliance, project controls, and inter-system exchange contracts — 16 generated schemas from 12 model modules.
 
-### Plant-state
+### Stream state (formerly plant-state)
 
-The plant-state schema is the central engineering data model. It represents process streams as multi-component vectors on standardized component bases. Stream state is managed as filesystem JSON files at `{project_dir}/mcp-outputs/streams/`, validated by the `StreamState` Pydantic model in `engineering-utils` and conforming to `plant-state.schema.yaml`.
+The stream-state schema is the central engineering data model. It represents process streams as multi-component vectors on standardized component bases. Stream state is Postgres-primary, stored in the `stream_snapshot` table via engineering-mcp tools. Filesystem JSON export is available for local tooling but is not the durable store. The `StreamState` Pydantic model supersedes the earlier `plant-state.schema.yaml`; the "plant-state" name is retained as a familiar alias.
 
 Each stream carries:
 - **Physical properties**: flow (m3/d), temperature (K), pressure (kPa), pH
@@ -113,7 +113,8 @@ Equipment items carry ISA 5.1-compliant tag structures following the area-code-s
 ```
 
 The equipment-item schema defines:
-- **Identity**: tag, equipment type code, process unit type, source unit ID
+- **Identity**: `equipment_uid` (UUID), ISA 5.1 tag, equipment type code, process unit type
+- **Nameplate** (OPC UA DI / IDTA AAS): manufacturer, model, serial number, product code, device class, hardware/software revision
 - **Sizing**: capacity (value + unit), driver power, sizing parameters
 - **Materials**: wetted material, construction material, lining
 - **Costing**: optional costing metadata
@@ -172,7 +173,103 @@ Every simulation result carries credibility metadata:
 | Decision grade | design, budgetary, screening, order-of-magnitude | What decisions can this support |
 | Validation basis | bench-tested, plant-data, literature, vendor, assumed | What evidence backs the model |
 
+Credibility metadata now also includes IDTA AAS "Provision of Simulation Models" fields: license, environment, file format, parameterization method, and simulation purpose.
+
 Credibility metadata prevents a common failure mode: using a screening-grade model to make a design-grade decision. The metadata travels with the result, not in a separate document.
+
+### Alarm definitions
+
+Rationalized alarm database per ISA-18.2. Each alarm carries tag, setpoint, units, priority, probable cause, consequence, operator response, deadbands, delays, and rationalization metadata. Stored row-level in Postgres for efficient queries.
+
+### Cause-effect matrices
+
+ISA-5.2 / IEC 62424 cause-effect matrix representation. Sparse matrix with cause and effect lists, linked by cells carrying matrix marks (X, T, D, A, S). Persisted as a single engineering artifact.
+
+### Instrument database
+
+ISA-5.1 instrument index and IO list. Structures loops, instruments, device specifications, measurement ranges, IO signals, and hazardous area classifications per IEC 62424. Includes off-page connectors and source P&ID references.
+
+### Hydraulic profile
+
+Node-by-node hydraulic grade line (HGL) and energy grade line (EGL) across a treatment train. Auto-validates gravity flow feasibility and identifies nodes requiring pumping. Unit-bearing field names: `design_flow_m3_d`, `tailwater_level_m`, `hgl_m`, `egl_m`.
+
+### Control execution
+
+ISA-88 / ISA-95 / IEC 61131-3 control execution hierarchy: process segments, control loops, interlocks (with SIL levels and bypass/reset semantics), control sequences with steps, PLC program organization units, and task bindings.
+
+### HAZOP and LOPA
+
+IEC 61882 HAZOP study vocabulary: nodes, deviations (guideword + parameter), causes, consequences, safeguards, and actions. Includes LOPA (Layer of Protection Analysis) scenarios with IPL credit factors and SIL ratings per IEC 61511.
+
+### Water compliance
+
+NPDES permit and DMR (Discharge Monitoring Report) vocabulary per 40 CFR 122/123. Facilities, discharge points, permit conditions, monitoring results, exceedance events, and regulatory submissions. Tracks compliance status and source systems (SCADA, LIMS, manual, OCR, NetDMR).
+
+### Project controls
+
+ANSI/EIA-748 earned value management: baselines, EV snapshots (PV, EV, AC, CPI, SPI, TCPI, EAC, ETC, VAC), cash flow forecasts, cost-to-complete projections, and contingency drawdowns by phase.
+
+### Ensaras exchange contracts
+
+Five data exchange contracts for the PuranOS → Ensaras operations handover:
+
+| Contract | Standards | Cadence |
+|---|---|---|
+| Commissioning handover package | IDTA AAS, ISA-95, ISO 14224 | One-time at commissioning |
+| Process performance summary | ISA-95 | Monthly |
+| Maintenance history exchange | ISO 14224 | Monthly |
+| Compliance status exchange | NPDES/DMR | Monthly |
+| Capex improvement request | BCF-XML | Event-driven |
+
+### Schema generation pipeline
+
+Pydantic models in `libs/engineering-utils/` are the source of truth. JSON Schema files are generated artifacts with canonical `$id` URIs at `https://puranwater.com/schemas/{filename}`. This makes schemas machine-linkable and version-controlled from a single Python source.
+
+| Group | Schema | Standards Alignment | What It Defines |
+|---|---|---|---|
+| Core | Stream-state | OPC UA AnalogItem, IDTA AAS Time Series, ISO 15926 | 31-component process stream with flow, T, P, pH, aggregates |
+| Core | Equipment-item | OPC UA DI, IDTA AAS, ISA-95, ISO 14224, CFIHOS | Equipment identity, nameplate, sizing, materials, costing |
+| Core | Model-credibility | IDTA AAS Simulation Models | Model status, decision grade, validation basis, license |
+| Instrumentation | Alarm-definition | ISA-18.2 | Rationalized alarms: tag, setpoint, priority, deadbands |
+| Instrumentation | Cause-effect-matrix | ISA-5.2, IEC 62424 | Sparse C&E matrix with standard mark types |
+| Instrumentation | Instrument-database | ISA-5.1, DEXPI, IEC 62424 | Instrument index + IO list: loops, instruments, signals |
+| Engineering | Hydraulic-profile | Engineering practice | Node-by-node HGL/EGL with gravity feasibility check |
+| Engineering | Control-execution-package | ISA-88, ISA-95, IEC 61131-3 | Process segments, control loops, interlocks, PLC programs |
+| Engineering | Hazop-study-package | IEC 61882, IEC 61511 | HAZOP nodes/deviations with LOPA scenarios |
+| Compliance | Water-compliance-package | NPDES, 40 CFR 122/123 | Facilities, permits, monitoring results, exceedances |
+| Project Controls | Project-controls-package | ANSI/EIA-748 | EV baselines, snapshots, cash flow, contingency |
+| Ensaras Exchange | Commissioning-handover-package | IDTA AAS, ISA-95, ISO 14224 | Equipment registry, spare parts, baselines, documents |
+| Ensaras Exchange | Process-performance-summary | ISA-95 | Monthly operational metrics per equipment |
+| Ensaras Exchange | Maintenance-history-exchange | ISO 14224 | Completed work orders from CMMS |
+| Ensaras Exchange | Compliance-status-exchange | NPDES/DMR | Permit compliance status per discharge point |
+| Ensaras Exchange | Capex-improvement-request | BCF-XML | Improvement requests with viewpoints and cost estimates |
+
+Retained YAML schemas (not yet generated from Pydantic):
+
+| Schema | Standards | What It Defines |
+|---|---|---|
+| Tag-format | ISA 5.1 | Area-code-sequence-suffix pattern validation |
+| Loop | ISA 5.1 | Instrumentation loops with function group encoding |
+| Component-tag | ISA 5.1 | Sub-equipment components with typed attributes |
+| Valve-schedule | API 6D, IEC 62424 | Valve types, sizes, actuators, failure positions |
+| Line-list | PIP PIC001, ISO 10628 | Piping line designations with service, material, size |
+| Artifact-envelope | Custom | Typed deliverables with version, dependencies, conformance claims |
+| Process-unit-taxonomy | ISA-95 | ~110 unit types across 8 treatment areas |
+
+### System ownership and bridge keys
+
+PuranOS splits data ownership across six systems, each with exclusive write access:
+
+| System | Owns | Bridge Key |
+|---|---|---|
+| PostgreSQL (3 databases) | Engineering artifacts, stream snapshots, alarms, cost observations, datasheets, equipment registry | `equipment_uid` (UUID) |
+| OpenProject | Workflow: tasks, punch items, ITPs, commissioning, RFIs, submittals | `openproject_wp_id` |
+| Atlas CMMS | Maintenance execution, PM schedules, failure tracking | `cmms_asset_id` |
+| InvenTree | Parts, inventory, BOMs | `inventree_part_id` |
+| Twenty CRM | Counterparties: vendors, clients, contractors | `vendor_quote_id` |
+| Google Drive | File storage (2 TB) | document URLs |
+
+`equipment_uid` (UUID) is the canonical equipment identity key. It uniquely identifies a functional position (the slot in the plant). OpenProject linkage is indirect — the equipment record carries an `openproject_wp_id` field, not the other way around. Cross-system joins happen at the application level, not via cross-database foreign keys.
 
 For detailed treatment of the engines that produce and consume these schemas, see [Engineering Engines](../../approach/engineering-engines.md).
 
@@ -219,7 +316,9 @@ Structured evidence chains for systematic bid evaluation:
 
 ### Compliance
 
-Pydantic-validated regulatory calculation models with monthly operational data inputs and auditable calculation chains. Currently focused on LCFS CA-GREET pathway calculations for biogas-to-RNG compliance. Every intermediate value is preserved for regulatory audit.
+Pydantic-validated regulatory calculation models with monthly operational data inputs and auditable calculation chains. Includes LCFS CA-GREET pathway calculations for biogas-to-RNG compliance, with every intermediate value preserved for regulatory audit.
+
+Water permit compliance (NPDES/DMR) and project controls (earned value, cash flow) now have dedicated Pydantic contracts under Source 2 — they crossed the threshold from custom domain logic into shared, standards-aligned schemas suitable for cross-tool consumption.
 
 ---
 
@@ -230,22 +329,23 @@ All three sources converge on a canonical set of shared schemas that define the 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  Source 1:          Source 2:          Source 3:          │
-│  Enterprise OSS     Engineering        Custom Domain     │
-│  (OpenProject,      Schemas            Schemas           │
-│   CRM, InvenTree,   (plant-state,      (procurement,     │
-│   Atlas CMMS)       equipment,         bid review,       │
-│                     instruments)       compliance)        │
+│  Enterprise OSS     Shared Pydantic    Custom Domain     │
+│  (OpenProject,      Contracts          Schemas           │
+│   CRM, InvenTree,   (16 generated      (procurement,     │
+│   Atlas CMMS)       schemas)           bid review)       │
 │         |                |                  |            │
 │         +----------------+------------------+            │
 │                          |                               │
 │              Shared Schemas                              │
 │              (the "narrow waist")                        │
 │                                                          │
-│              plant-state . equipment-item                │
-│              model-credibility . artifact-envelope       │
-│              process-unit-taxonomy . tag-format          │
-│              component-tag . loop . line-list            │
-│              valve-schedule                              │
+│       Core: stream-state . equipment-item                │
+│             model-credibility                            │
+│       Instrumentation: alarm . C&E . instruments         │
+│       Engineering: hydraulic . control . HAZOP           │
+│       Compliance: water-compliance . project-controls    │
+│       Exchange: 5 Ensaras handover contracts             │
+│       Retained: artifact-envelope . taxonomy . tags      │
 │                          |                               │
 │              Every tool and agent                        │
 │              speaks this entity model                    │
@@ -280,8 +380,8 @@ The narrow-waist approach has a second advantage beyond integration cost. Becaus
 
 Shared schemas follow a simple governance model:
 
-1. **Pydantic models** are the source of truth for engineering entity definitions. They define types, constraints, and validation logic in code.
-2. **JSON Schema mirrors** are generated from the Pydantic models for tooling that cannot import Python directly (schema validators, documentation generators, non-Python consumers).
+1. **Pydantic models** are the source of truth for engineering entity definitions. They define types, constraints, and validation logic in code. Currently 16 contract schemas from 12 model modules.
+2. **JSON Schema mirrors** are generated from the Pydantic models via `generate_schemas.py`. Each carries `$id: "https://puranwater.com/schemas/{filename}"` as a canonical logical identifier.
 3. **Breaking changes** require a version bump and migration. Fields can be added without a version bump. Fields cannot be removed or renamed without one.
 4. **Conformance tests** verify that MCP server outputs match the shared schemas. These run in CI.
 
@@ -299,13 +399,20 @@ Where each major entity type originates and where it flows:
 | Equipment position | Equipment identity registry | PE lead (at P&ID digitization) | All agents (cross-system resolution) |
 | Asset instance | Equipment identity registry | Maintenance (at commissioning) | CMMS, procurement, inventory |
 | Equipment item | Engineering schema | Engine MCP servers (sizing) | Procurement, costing, P&ID generation |
-| Plant-state stream | Engineering schema | Engine MCP servers (simulation), written as filesystem JSON | Downstream engines, reports, deliverable generation |
+| Stream state | Engineering schema | Engine MCP servers (simulation), Postgres-primary via stream_snapshot | Downstream engines, reports, deliverable generation |
 | Cost observation | Custom domain (procurement) | Procurement agents | Estimating, bid evaluation |
 | Process datasheet | Custom domain (procurement) | Procurement agents, O&M manual ingestion | Maintenance, operations |
 | Artifact envelope | Engineering schema | Any deliverable-producing tool | Version tracking, dependency resolution |
 | Model credibility | Engineering schema | Engine MCP servers | Decision-support agents |
 | BOM entry | Enterprise OSS (InvenTree) | Equipment agents | Procurement, inventory |
 | Work order | Enterprise OSS (Atlas CMMS) | Maintenance agents | Operations, scheduling |
+| Alarm definition | Engineering schema | Control philosophy workflows | SCADA config, alarm rationalization, operations |
+| Cause-effect matrix | Engineering schema | Control philosophy workflows | Instrument wiring, SIS design |
+| Hydraulic profile | Engineering schema | Hydraulic design workflows | Civil/structural, pump sizing |
+| Control execution | Engineering schema | Control design workflows | PLC programming, commissioning |
+| HAZOP study | Engineering schema | Safety review workflows | SIL assessment, action tracking |
+| Water compliance | Engineering schema | Compliance agents | NPDES reporting, exceedance tracking |
+| Project controls | Engineering schema | PM analytics | EV reporting, cash flow forecasting |
 | Compliance record | Custom domain (compliance) | Compliance agents | Regulatory reporting |
 
 ---

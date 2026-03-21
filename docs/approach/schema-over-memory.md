@@ -69,19 +69,22 @@ to vendor changes without notice. Self-hosted Postgres schemas are inspectable,
 stable, and under operator control.
 
 
-### Source 2: Purpose-built engineering schemas
+### Source 2: Shared Pydantic contract schemas
 
 Industrial engineering has its own ontology that no off-the-shelf software
-provides. PuranOS defines it explicitly through shared schemas:
+provides. PuranOS defines it explicitly through shared Pydantic models that
+generate 16 JSON Schema files with canonical `$id` URIs. This source has expanded
+beyond classical engineering schemas to cover instrumentation, compliance,
+project controls, and inter-system exchange contracts.
 
-**Plant-state model.** A 31-component process stream model based on the mASM2d
-(modified Activated Sludge Model 2d) component basis. Each stream carries flow,
-temperature, pressure, pH, individual component concentrations, and computed
-aggregates (COD, BOD5, TSS, VSS, TKN, TN, TP, alkalinity, TDS, conductivity,
-ionic strength). Streams are typed, versioned, and carry source model
-provenance. Multiple component bases are supported (mASM2d, MCAS for WaterTAP
-solutes, mADM1 for 62-component anaerobic models) with typed converters between
-them.
+**Stream-state model (formerly plant-state).** A 31-component process stream model
+based on the mASM2d (modified Activated Sludge Model 2d) component basis. Each
+stream carries flow, temperature, pressure, pH, individual component
+concentrations, and computed aggregates. Stream state is Postgres-primary, stored
+in the `stream_snapshot` table via engineering-mcp tools; filesystem JSON export
+is available for local tooling but is not the durable store. Multiple component
+bases are supported (mASM2d, MCAS for WaterTAP solutes, mADM1 for 62-component
+anaerobic models) with typed converters carrying provenance between them.
 
 **Process-unit taxonomy.** Approximately 100 unit process types organized
 across 8 treatment areas, aligned with an ISA-95-inspired hierarchy (Area →
@@ -111,7 +114,17 @@ metadata:
 
 This matters because an agent-generated sizing is not automatically
 "engineering grade." The credibility metadata is what allows a PE reviewer to
-know what level of trust to place in a result.
+know what level of trust to place in a result. Credibility metadata now also
+includes IDTA AAS "Provision of Simulation Models" fields: license,
+environment, parameterization method, and simulation purpose.
+
+**Beyond the original six.** The engineering schema set has expanded to 16
+generated schemas covering alarm management (ISA-18.2), cause-effect matrices
+(ISA-5.2), instrument databases (ISA-5.1/DEXPI), hydraulic profiles, control
+execution (ISA-88/IEC 61131-3), HAZOP studies (IEC 61882), water compliance
+(NPDES), project controls (ANSI/EIA-748), and five Ensaras inter-system
+exchange contracts. Equipment identity now includes OPC UA DI and IDTA AAS
+nameplate fields for industry-standard equipment data exchange.
 
 
 ### Source 3: Custom domain schemas in Postgres
