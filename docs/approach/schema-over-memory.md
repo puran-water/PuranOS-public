@@ -8,8 +8,8 @@ systems over existing documents. At prototype scale, these work. At enterprise
 scale, they produce context bloat and "garbage memory."
 
 The alternative: make the enterprise's own tools and schemas the primary
-knowledge substrate. When an engineer writes a work order in the CMMS, that IS
-the memory of what maintenance was done. When a project manager creates an
+knowledge substrate. When an operator writes a work order in the CMMS, that IS
+the memory of what maintenance was done. When a sales agent creates an
 opportunity in the CRM, that IS the memory of the commercial relationship. A
 separate "memory layer" is architecturally redundant.
 
