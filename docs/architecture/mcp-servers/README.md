@@ -47,7 +47,7 @@ The `processeng-workspace` contains the bulk of the domain-specific engineering 
 
 Stream state (process stream data) is Postgres-primary, stored in the `stream_snapshot` table via engineering-mcp tools. Filesystem JSON export is available for local tooling but is not the durable store. The `plant-state-skill` provides the workflow SOP for stream reasoning.
 
-This is supported by shared utilities in `libs/engineering-utils/`, which provides 16 contract schemas (from 12 model modules) as Pydantic models with generated JSON Schema mirrors.
+This is supported by shared utilities in `libs/engineering-utils/`, which provides 20 contract schemas (from 17 model modules) as Pydantic models with generated JSON Schema mirrors.
 
 Two worktree themes are especially important now:
 
@@ -55,6 +55,12 @@ Two worktree themes are especially important now:
 - WaterTAP has shifted toward a shared action-catalog architecture with session persistence, registry-backed discovery, detached jobs, and stronger MCP/CLI parity.
 
 At the monorepo level, that means the engineering stack is converging on reusable orchestration engines rather than isolated solver wrappers.
+
+### Cross-Domain Ontology
+
+| Server | Role |
+|--------|------|
+| `ontology-mcp` | Read-only cross-domain graph resolution: traverses 144 typed links across all databases, validates governed actions against lifecycle state machines, exposes persona capabilities |
 
 ### Compliance, Finance, and Growth
 

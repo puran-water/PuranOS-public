@@ -81,7 +81,7 @@ stable, and under operator control.
 
 Industrial engineering has its own ontology that no off-the-shelf software
 provides. PuranOS defines it explicitly through shared Pydantic models that
-generate 16 JSON Schema files with canonical `$id` URIs. This source has expanded
+generate 20 JSON Schema files with canonical `$id` URIs. This source has expanded
 beyond classical engineering schemas to cover instrumentation, compliance,
 project controls, and inter-system exchange contracts.
 

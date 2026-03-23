@@ -64,7 +64,7 @@ Each MCP server exposes a curated subset of the application's full schema. The s
 
 Industrial process engineering has its own ontology that no off-the-shelf software provides. A CRM does not know what a process stream is. A PM tool does not know what model credibility means. An inventory system does not distinguish between a centrifugal pump and a positive displacement pump at the process engineering level.
 
-PuranOS defines this ontology explicitly through shared Pydantic contract schemas. These live in `libs/engineering-utils/` as Pydantic models; JSON Schema mirrors are generated with canonical `$id` URIs at `https://puranwater.com/schemas/`. Source 2 has expanded from classical engineering schemas to cover instrumentation, compliance, project controls, and inter-system exchange contracts — 16 generated schemas from 12 model modules.
+PuranOS defines this ontology explicitly through shared Pydantic contract schemas. These live in `libs/engineering-utils/` as Pydantic models; JSON Schema mirrors are generated with canonical `$id` URIs at `https://puranwater.com/schemas/`. Source 2 has expanded from classical engineering schemas to cover instrumentation, compliance, project controls, and inter-system exchange contracts — 20 generated schemas from 17 model modules.
 
 ### Stream state (formerly plant-state)
 
@@ -243,6 +243,10 @@ Pydantic models in `libs/engineering-utils/` are the source of truth. JSON Schem
 | Ensaras Exchange | Maintenance-history-exchange | ISO 14224 | Completed work orders from CMMS |
 | Ensaras Exchange | Compliance-status-exchange | NPDES/DMR | Permit compliance status per discharge point |
 | Ensaras Exchange | Capex-improvement-request | BCF-XML | Improvement requests with viewpoints and cost estimates |
+| Operations | Operations-runtime-package | ISA-95 | Alarm events, shift logs, operator rounds, chemical dosing |
+| Reliability | Design-performance-baseline | ISO 14224 | Design guarantees, vendor baselines, comparison metrics |
+| Reliability | Reliability-kpi-snapshot | ISO 14224 | MTBF, failure events, spare consumption, vendor guarantees |
+| Shared | Project | Custom | Canonical project identity: ref, name, created_at |
 
 Retained YAML schemas (not yet generated from Pydantic):
 
@@ -322,6 +326,95 @@ Water permit compliance (NPDES/DMR) and project controls (earned value, cash flo
 
 ---
 
+## The graph-and-action layer
+
+The three ontology sources define *what entities exist*. The graph-and-action layer defines *how they relate* and *what governed mutations are allowed*.
+
+### Why schemas alone are not enough
+
+A schema catalog tells an agent what an equipment position is and what a vendor quote is. It does not tell the agent that a specific vendor quote *prices* a specific equipment position, or that awarding that quote is only valid when the quote status is `received`, `under_review`, or `shortlisted`. Without explicit typed relationships and governed actions, agents must hard-code cross-system join logic in individual skills — logic that silently drifts as schemas evolve.
+
+### Link catalog
+
+A generated catalog of 144 typed relationships across all databases. Each link declares source, target, join mechanism, cardinality, and semantics:
+
+| Join Kind | Count | Description |
+|-----------|-------|-------------|
+| `foreign_key` | 107 | Intra-DB FK constraints auto-discovered from DDL |
+| `bridge_key` | 30 | Cross-DB joins via `equipment_uid`, `project_ref`, `vendor_quote_id`, etc. |
+| `external_ref` | 7 | Links to Atlas CMMS, InvenTree, OpenProject (no local FK) |
+
+The catalog is generated at build time from two sources: FK constraints parsed from SQL DDL, and a hand-curated bridge-key seed file that classifies cross-DB column matches with semantic labels (HAS, MONITORS, CONTROLS, SOURCED_FROM, etc.).
+
+Example edge:
+
+```yaml
+- id: alarm_definition.monitors.equipment_position
+  source: {system: engineering_mcp, table: alarm_definition}
+  target: {system: equipment_identity, table: equipment_position}
+  join: {kind: bridge_key, source_field: equipment_uid, target_field: equipment_uid}
+  cardinality: many_to_one
+  semantics: alarm_definition MONITORS equipment_position via equipment_uid
+```
+
+The owner of the write model owns the link manifest. Link declarations live next to the domain servers that own the tables, not in a central ontology file. This prevents a bottleneck where a central ontology team must approve every schema change.
+
+### Action catalog
+
+12 governed mutations declared in domain-local `ontology.actions.yaml` files. Each action specifies inputs, preconditions (referencing lifecycle state machines), and effects:
+
+| Server | Actions |
+|--------|---------|
+| equipment-identity-mcp | `create_equipment_position`, `rename_equipment_tag`, `commission_asset_instance`, `update_equipment_lifecycle` |
+| procurement-mcp | `register_project`, `create_process_datasheet`, `supersede_datasheet_revision`, `award_vendor_quote`, `record_cost_observation` |
+| compliance-mcp | `record_monitoring_result`, `open_exceedance`, `close_exceedance` |
+
+Preconditions reference lifecycle state machines auto-generated from CHECK constraints in the Postgres schemas:
+
+```yaml
+preconditions:
+  - state: vendor_quote.lifecycle IN [received, under_review, shortlisted]
+  - field: project_ref IS NOT NULL
+```
+
+Every governed mutation emits an append-only action event with precondition snapshots, declared effects, applied effects, and agent/human attribution — providing the audit trail required for compliance in regulated operations.
+
+### Lifecycle state machines
+
+14 lifecycle definitions auto-generated from CHECK enum constraints in the 85 Postgres table schemas. These define the valid state progressions for objects like equipment positions, vendor quotes, process datasheets, and exceedance events:
+
+```
+equipment_position: design → procurement → construction → commissioning → operations → decommissioned
+vendor_quote: draft → budget → rfq_issued → received → under_review → shortlisted → awarded
+process_datasheet: rfq → proposal → submittal → approved_for_manufacturing
+exceedance_event: open → draft_report → submitted → closed
+```
+
+### ontology-mcp: cross-domain graph resolution
+
+A read-only MCP server that connects to all four Postgres databases and resolves cross-domain relationships. It exposes:
+
+- **Resource template**: `ontology://neighbors/{object_type}/{id}` — traverses the link catalog, returns neighbors across databases
+- **Resource**: `ontology://schema/catalog` — the full link and action catalog
+- **Resource template**: `ontology://actions/{action_name}` — action details with preconditions and effects
+- **Resource template**: `ontology://persona/{persona_name}/capabilities` — servers and actions available to a persona
+- **Tools**: `find_related`, `get_link_catalog`, `validate_action`, `list_allowed_actions`, `classify_equipment`
+
+This server intentionally breaks the "one server, one DB" pattern. It is explicitly read-only and exists to resolve cross-domain graphs that no single domain server can see.
+
+### Compile-time, not runtime
+
+The link catalog and action catalog are generated artifacts, not runtime graph queries. This is a deliberate architectural choice:
+
+- **No graph database** — the catalogs are JSON files generated from DDL introspection + hand-curated bridge keys
+- **No runtime ontology kernel** — the generated artifacts are consumed by the ontology-mcp server as static catalogs
+- **Validated in CI** — every link edge is cross-validated against published Postgres schemas for field existence and type compatibility
+- **Versioned** — every generated catalog carries `schema_version`, `generated_at`, and source git SHA
+
+This keeps the operational footprint minimal while providing the same cross-domain resolution that a heavyweight ontology runtime would offer.
+
+---
+
 ## The narrow-waist pattern
 
 All three sources converge on a canonical set of shared schemas that define the entities every tool and agent must understand.
@@ -331,7 +424,7 @@ All three sources converge on a canonical set of shared schemas that define the 
 │  Source 1:          Source 2:          Source 3:          │
 │  Enterprise OSS     Shared Pydantic    Custom Domain     │
 │  (OpenProject,      Contracts          Schemas           │
-│   CRM, InvenTree,   (16 generated      (procurement,     │
+│   CRM, InvenTree,   (20 generated      (procurement,     │
 │   Atlas CMMS)       schemas)           bid review)       │
 │         |                |                  |            │
 │         +----------------+------------------+            │
@@ -340,22 +433,26 @@ All three sources converge on a canonical set of shared schemas that define the 
 │              (the "narrow waist")                        │
 │                                                          │
 │       Core: stream-state . equipment-item                │
-│             model-credibility                            │
+│             model-credibility . project                  │
 │       Instrumentation: alarm . C&E . instruments         │
 │       Engineering: hydraulic . control . HAZOP           │
 │       Compliance: water-compliance                       │
+│       Operations: operations-runtime . reliability       │
 │       Project Controls: project-controls                 │
 │       Exchange: 5 Ensaras handover contracts             │
 │       Retained: artifact-envelope . taxonomy . tags      │
+│                          |                               │
+│              Graph-and-action layer                      │
+│              (144 typed links, 12 governed actions)      │
 │                          |                               │
 │              Every tool and agent                        │
 │              speaks this entity model                    │
 └──────────────────────────────────────────────────────────┘
 ```
 
-This is the enterprise's narrow waist. Wide diversity of tools and applications above. Wide diversity of storage and implementation below. A common entity model in between.
+This is the enterprise's narrow waist. Wide diversity of tools and applications above. Wide diversity of storage and implementation below. A common entity model in between — now with explicit typed relationships and governed mutations.
 
-Any tool that produces an equipment item must produce one that conforms to the equipment-item schema. Any tool that generates a deliverable must wrap it in an artifact envelope. Any simulation result must carry model credibility metadata.
+Any tool that produces an equipment item must produce one that conforms to the equipment-item schema. Any tool that generates a deliverable must wrap it in an artifact envelope. Any simulation result must carry model credibility metadata. Any governed mutation must satisfy its declared preconditions and emit an audit event.
 
 The narrow waist is enforced at the MCP server boundary. Agents never bypass it. The server validates conformance before accepting or emitting data.
 
