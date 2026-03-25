@@ -64,7 +64,7 @@ Each MCP server exposes a curated subset of the application's full schema. The s
 
 Industrial process engineering has its own ontology that no off-the-shelf software provides. A CRM does not know what a process stream is. A PM tool does not know what model credibility means. An inventory system does not distinguish between a centrifugal pump and a positive displacement pump at the process engineering level.
 
-PuranOS defines this ontology explicitly through shared Pydantic contract schemas. These live in `libs/engineering-utils/` as Pydantic models; JSON Schema mirrors are generated with canonical `$id` URIs at `https://puranwater.com/schemas/`. Source 2 has expanded from classical engineering schemas to cover instrumentation, compliance, project controls, and inter-system exchange contracts — 20 generated schemas from 17 model modules.
+PuranOS defines this ontology explicitly through shared Pydantic contract schemas. These live in `libs/engineering-utils/` as Pydantic models; JSON Schema mirrors are generated with canonical `$id` URIs at `https://puranwater.com/schemas/`. Source 2 has expanded from classical engineering schemas to cover instrumentation, compliance, project controls, and inter-system exchange contracts — 23 generated schemas.
 
 ### Stream state (formerly plant-state)
 
@@ -266,7 +266,7 @@ PuranOS splits data ownership across six systems, each with exclusive write acce
 
 | System | Owns | Bridge Key |
 |---|---|---|
-| PostgreSQL (3 databases) | Engineering artifacts, stream snapshots, alarms, cost observations, datasheets, equipment registry | `equipment_uid` (UUID) |
+| PostgreSQL (6 databases) | Engineering artifacts, stream snapshots, alarms, cost observations, datasheets, equipment registry, contractor management, project controls | `equipment_uid` (UUID) |
 | OpenProject | Workflow: tasks, punch items, ITPs, commissioning, RFIs, submittals | `openproject_wp_id` |
 | Atlas CMMS | Maintenance execution, PM schedules, failure tracking | `cmms_asset_id` |
 | InvenTree | Parts, inventory, BOMs | `inventree_part_id` |
@@ -336,13 +336,13 @@ A schema catalog tells an agent what an equipment position is and what a vendor 
 
 ### Link catalog
 
-A generated catalog of 144 typed relationships across all databases. Each link declares source, target, join mechanism, cardinality, and semantics:
+A generated catalog of 204 typed relationships across all databases. Each link declares source, target, join mechanism, cardinality, and semantics:
 
 | Join Kind | Count | Description |
 |-----------|-------|-------------|
-| `foreign_key` | 107 | Intra-DB FK constraints auto-discovered from DDL |
-| `bridge_key` | 30 | Cross-DB joins via `equipment_uid`, `project_ref`, `vendor_quote_id`, etc. |
-| `external_ref` | 7 | Links to Atlas CMMS, InvenTree, OpenProject (no local FK) |
+| `foreign_key` | 135 | Intra-DB FK constraints auto-discovered from DDL |
+| `bridge_key` | 54 | Cross-DB joins via `equipment_uid`, `project_ref`, `vendor_quote_id`, etc. |
+| `external_ref` | 15 | Links to Atlas CMMS, InvenTree, OpenProject (no local FK) |
 
 The catalog is generated at build time from two sources: FK constraints parsed from SQL DDL, and a hand-curated bridge-key seed file that classifies cross-DB column matches with semantic labels (HAS, MONITORS, CONTROLS, SOURCED_FROM, etc.).
 
@@ -361,7 +361,7 @@ The owner of the write model owns the link manifest. Link declarations live next
 
 ### Action catalog
 
-12 governed mutations declared in domain-local `ontology.actions.yaml` files. Each action specifies inputs, preconditions (referencing lifecycle state machines), and effects:
+19 governed mutations declared in domain-local `ontology.actions.yaml` files. Each action specifies inputs, preconditions (referencing lifecycle state machines), and effects:
 
 | Server | Actions |
 |--------|---------|
@@ -381,7 +381,7 @@ Every governed mutation emits an append-only action event with precondition snap
 
 ### Lifecycle state machines
 
-14 lifecycle definitions auto-generated from CHECK enum constraints in the 85 Postgres table schemas. These define the valid state progressions for objects like equipment positions, vendor quotes, process datasheets, and exceedance events:
+21 lifecycle definitions auto-generated from CHECK enum constraints in the 106 Postgres table schemas. These define the valid state progressions for objects like equipment positions, vendor quotes, process datasheets, and exceedance events:
 
 ```
 equipment_position: design → procurement → construction → commissioning → operations → decommissioned
@@ -392,7 +392,7 @@ exceedance_event: open → draft_report → submitted → closed
 
 ### ontology-mcp: cross-domain graph resolution
 
-A read-only MCP server that connects to all four Postgres databases and resolves cross-domain relationships. It exposes:
+A read-only MCP server that connects to all six Postgres databases and resolves cross-domain relationships. It exposes:
 
 - **Resource template**: `ontology://neighbors/{object_type}/{id}` — traverses the link catalog, returns neighbors across databases
 - **Resource**: `ontology://schema/catalog` — the full link and action catalog
@@ -424,7 +424,7 @@ All three sources converge on a canonical set of shared schemas that define the 
 │  Source 1:          Source 2:          Source 3:          │
 │  Enterprise OSS     Shared Pydantic    Custom Domain     │
 │  (OpenProject,      Contracts          Schemas           │
-│   CRM, InvenTree,   (20 generated      (procurement,     │
+│   CRM, InvenTree,   (23 generated      (procurement,     │
 │   Atlas CMMS)       schemas)           bid review)       │
 │         |                |                  |            │
 │         +----------------+------------------+            │
@@ -443,7 +443,7 @@ All three sources converge on a canonical set of shared schemas that define the 
 │       Retained: artifact-envelope . taxonomy . tags      │
 │                          |                               │
 │              Graph-and-action layer                      │
-│              (144 typed links, 12 governed actions)      │
+│              (204 typed links, 19 governed actions)      │
 │                          |                               │
 │              Every tool and agent                        │
 │              speaks this entity model                    │
@@ -478,7 +478,7 @@ The narrow-waist approach has a second advantage beyond integration cost. Becaus
 
 Shared schemas follow a simple governance model:
 
-1. **Pydantic models** are the source of truth for engineering entity definitions. They define types, constraints, and validation logic in code. Currently 16 contract schemas from 12 model modules.
+1. **Pydantic models** are the source of truth for engineering entity definitions. They define types, constraints, and validation logic in code. Currently 23 contract schemas.
 2. **JSON Schema mirrors** are generated from the Pydantic models via `generate_schemas.py`. Each carries `$id: "https://puranwater.com/schemas/{filename}"` as a canonical logical identifier.
 3. **Breaking changes** require a version bump and migration. Fields can be added without a version bump. Fields cannot be removed or renamed without one.
 4. **Conformance tests** verify that MCP server outputs match the shared schemas. These run in CI.
