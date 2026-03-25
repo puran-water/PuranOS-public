@@ -336,11 +336,11 @@ A schema catalog tells an agent what an equipment position is and what a vendor 
 
 ### Link catalog
 
-A generated catalog of 204 typed relationships across all databases. Each link declares source, target, join mechanism, cardinality, and semantics:
+A generated catalog of 198 typed relationships across all databases. Each link declares source, target, join mechanism, cardinality, and semantics:
 
 | Join Kind | Count | Description |
 |-----------|-------|-------------|
-| `foreign_key` | 135 | Intra-DB FK constraints auto-discovered from DDL |
+| `foreign_key` | 129 | Intra-DB FK constraints introspected from live databases |
 | `bridge_key` | 54 | Cross-DB joins via `equipment_uid`, `project_ref`, `vendor_quote_id`, etc. |
 | `external_ref` | 15 | Links to Atlas CMMS, InvenTree, OpenProject (no local FK) |
 
@@ -381,7 +381,7 @@ Every governed mutation emits an append-only action event with precondition snap
 
 ### Lifecycle state machines
 
-21 lifecycle definitions auto-generated from CHECK enum constraints in the 106 Postgres table schemas. These define the valid state progressions for objects like equipment positions, vendor quotes, process datasheets, and exceedance events:
+21 lifecycle definitions auto-generated from CHECK enum constraints in the 98 Postgres table schemas. These define the valid state progressions for objects like equipment positions, vendor quotes, process datasheets, and exceedance events:
 
 ```
 equipment_position: design → procurement → construction → commissioning → operations → decommissioned
@@ -443,7 +443,7 @@ All three sources converge on a canonical set of shared schemas that define the 
 │       Retained: artifact-envelope . taxonomy . tags      │
 │                          |                               │
 │              Graph-and-action layer                      │
-│              (204 typed links, 19 governed actions)      │
+│              (198 typed links, 19 governed actions)      │
 │                          |                               │
 │              Every tool and agent                        │
 │              speaks this entity model                    │
