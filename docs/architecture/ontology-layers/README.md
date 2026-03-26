@@ -64,7 +64,7 @@ Each MCP server exposes a curated subset of the application's full schema. The s
 
 Industrial process engineering has its own ontology that no off-the-shelf software provides. A CRM does not know what a process stream is. A PM tool does not know what model credibility means. An inventory system does not distinguish between a centrifugal pump and a positive displacement pump at the process engineering level.
 
-PuranOS defines this ontology explicitly through shared Pydantic contract schemas. These live in `libs/engineering-utils/` as Pydantic models; JSON Schema mirrors are generated with canonical `$id` URIs at `https://puranwater.com/schemas/`. Source 2 has expanded from classical engineering schemas to cover instrumentation, compliance, project controls, and inter-system exchange contracts — 23 generated schemas.
+PuranOS defines this ontology explicitly through shared Pydantic contract schemas. These live in `libs/engineering-utils/` as Pydantic models; JSON Schema mirrors are generated with canonical `$id` URIs at `https://puranwater.com/schemas/`. Source 2 has expanded from classical engineering schemas to cover instrumentation, compliance, project controls, project finance, contractor management, and inter-system exchange contracts — 26 generated schemas across 7 Postgres databases and 102 tables.
 
 ### Stream state (formerly plant-state)
 
@@ -203,7 +203,7 @@ IEC 61882 HAZOP study vocabulary: nodes, deviations (guideword + parameter), cau
 
 ### Water compliance
 
-NPDES permit and DMR (Discharge Monitoring Report) vocabulary per 40 CFR 122/123. Facilities, discharge points, permit conditions, monitoring results, exceedance events, and regulatory submissions. Tracks compliance status and source systems (SCADA, LIMS, manual, OCR, NetDMR).
+Jurisdiction-agnostic obligation fulfillment model for multi-media compliance (water, air, solids, gas, liquid product). Obligation instruments (permits, consent orders, contracts, loan covenants), requirements (narrative or quantitative), quantitative limits, compliance points, assessed values, nonconformances, and regulatory submissions. Parameter registry serves as controlled vocabulary. Supersedes the earlier NPDES-centric model.
 
 ### Project controls
 
@@ -220,6 +220,24 @@ Five data exchange contracts for the PuranOS → Ensaras operations handover:
 | Maintenance history exchange | ISO 14224 | Monthly |
 | Compliance status exchange | NPDES/DMR | Monthly |
 | Capex improvement request | BCF-XML | Event-driven |
+
+### Contractor management
+
+DBIA design-build contract kernel: contracts (530/535/540/545 forms), schedules of values (AIA G703), pay applications (AIA G702), change orders, and claim events. Thin financial sidecar to OpenProject — OP owns workflow; Postgres stores structured financial data that OP custom fields cannot hold (SOV line items, retainage math, CO cost impacts).
+
+### Quality test facts
+
+Unified construction QA measurement model for ITPs, commissioning tests, FATs, SATs. Standards-shaped fact model: one test header (`quality_test_record`) with domain classification (construction_itp/commissioning/fat/sat) and provenance tracking (source_system: openproject/atlas_cmms/inventree/manual), plus individual measurement rows (`quality_test_measurement`) with numeric criteria, tolerances, and pass/fail per parameter. Complements OpenProject workflow — OP owns status/assignments; Postgres stores structured measurements that OP custom fields cannot hold.
+
+### Project finance
+
+Full asset financial lifecycle persistence: development projections, operations actuals, asset disposition. Separate from project controls (which covers schedule/cost management during design-build). Three base tables:
+
+- **Proforma model run** — immutable archive of proforma engine builds. Stores full `ModelInputs` (~20-40KB) and `ModelOutputs` (including all 252 monthly PeriodCashFlow rows, ~50KB) as JSONB, with `SummaryKPIs` extracted for fast queries. Dedup via `inputs_hash` (SHA-256).
+- **Actuals import** — batch header per ingestion event (source system, filename, period range, raw payload for provenance).
+- **Actuals record** — individual line-item actuals at query-heavy grain (one row per line item per period: revenue, opex, ebitda, etc.).
+
+Derived computations (variance analysis, capital call forecasting, asset valuation via trailing EBITDA/FCF) are computed on demand from model runs + actuals — not persisted as base tables.
 
 ### Schema generation pipeline
 
@@ -247,6 +265,10 @@ Pydantic models in `libs/engineering-utils/` are the source of truth. JSON Schem
 | Reliability | Design-performance-baseline | ISO 14224 | Design guarantees, vendor baselines, comparison metrics |
 | Reliability | Reliability-kpi-snapshot | ISO 14224 | MTBF, failure events, spare consumption, vendor guarantees |
 | Shared | Project | Custom | Canonical project identity: ref, name, created_at |
+| Contractor Mgmt | Contract | DBIA 530/535/540/545, AIA G702/G703 | Contract envelope, SOV, pay apps, change orders, claims |
+| Quality Test | Quality-test-package | IEC 62381, ISO 10005, ISO 17025 | Unified ITP/commissioning/FAT/SAT test records + measurements |
+| Project Finance | Proforma-model-run | Infrastructure project finance practice | Immutable model run archive (inputs, outputs, KPIs) |
+| Project Finance | Proforma-actuals-record | Infrastructure project finance practice | Line-item actuals at period grain (revenue, opex, ebitda, etc.) |
 
 Retained YAML schemas (not yet generated from Pydantic):
 
