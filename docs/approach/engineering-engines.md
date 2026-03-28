@@ -20,27 +20,21 @@ schema-validated. Engineering models are not tools that agents happen
 to use. They are first-class citizens of the operating model.
 
 
-## API-first vs GUI-first
+## API-first engineering computation
 
-The commercial tools that process engineers use today — BioWin, GPS-X, ROSA, WAVE, OLI Studio, AFT Fathom, HTRI Xchanger Suite — are GUI-first applications. Results live inside their GUIs, with limited or no programmatic access. Chaining a biological simulation into a membrane projection into a cost estimate requires an engineer to manually export, transform, and re-import between tools.
+PuranOS engineering servers are API-first: every calculation is exposed as a typed MCP tool call, callable by agents or scripts. Results are versioned, schema-validated, and carry credibility metadata.
 
-For the workflows PuranOS targets — chaining calculations across engines, versioning results, auditing provenance — GUI-centric tools are a poor fit. API-first tools are a structural requirement.
+| Server | Capabilities |
+|---|---|
+| qsdsan-engine-mcp | Biological and chemical simulation — IWA ASM1, ASM2d, mADM1 — activated sludge, anaerobic digestion, clarification, solids handling |
+| watertap-engine-mcp | Membrane modeling and techno-economic analysis — RO, NF, ED, IX, evaporation, crystallization — with session-persistent flowsheets |
+| water-chemistry-mcp | Aqueous equilibrium, speciation, precipitation, and dosing optimization via PHREEQC (phreeqc.dat, minteq.dat, llnl.dat, pitzer.dat) |
+| fluids-mcp | Pipe sizing, pump TDH, control valve sizing (IEC 60534), blower power — 120+ fluid properties via CoolProp |
+| heat-transfer-mcp | Shell-and-tube exchangers, surface heat loss, insulation design, heat trace — 390+ material conductivities (VDI/ASHRAE) |
+| corrosion-engineering-mcp | Sweet/sour corrosion prediction (deWaard-Milliams), galvanic corrosion, pitting risk, material selection |
+| engineering-mcp | P&ID generation (DEXPI equipment classes), BFD/PFD generation (SFILES notation), ISA 5.1 tagging, equipment tag management |
 
-PuranOS replaces this with API-first engineering servers, each exposing deterministic calculations as typed MCP tool surfaces:
-
-| PuranOS Engine | Domain | Commercial Equivalent |
-|---|---|---|
-| qsdsan-engine-mcp | Biological/chemical simulation (ASM2d, mADM1) | BioWin, GPS-X, Sumo |
-| watertap-engine-mcp | Membrane/separation/costing (RO, NF, IX, evaporation) | ROSA, WAVE, IMS Design |
-| water-chemistry-mcp | Aqueous speciation and equilibrium (PHREEQC) | OLI Studio |
-| fluids-mcp | Pipe flow, valve sizing, pump/compressor design | AFT Fathom, Pipe-FLO |
-| heat-transfer-mcp | Heat exchangers, insulation, heat trace | HTRI Xchanger Suite |
-| corrosion-engineering-mcp | Sweet/sour corrosion, galvanic, pitting | In-house spreadsheets |
-| engineering-mcp | DEXPI P&IDs, SFILES BFDs/PFDs, ISA 5.1 tagging | AutoCAD P&ID, SmartPlant |
-
-Every calculation is an API call. Agents chain them. Results are versioned, schema-validated, and carry credibility metadata. No license fees. Peer-reviewed science. All dependencies open-source.
-
-The difference is not just cost. It is composability. A GUI tool can produce a result. An API tool can produce a result that feeds directly into the next calculation, with typed handoffs, provenance tracking, and automated validation at every boundary.
+Cross-engine handoffs use typed converters with provenance tracking. A QSDsan effluent composition feeds directly into a WaterTAP membrane model with unit conversion and component mapping. Every intermediate result is schema-validated and carries its credibility grade.
 
 
 ## The operating model
@@ -270,7 +264,7 @@ engineer of record signs and seals drawings. That engineer needs to
 understand the basis of every calculation. Credibility metadata and
 provenance tracking exist to serve that need — not to add bureaucracy,
 but to make the computational basis of a design as transparent as the
-hand calculations it replaces.
+hand calculations it builds on.
 
 
 ## Further reading

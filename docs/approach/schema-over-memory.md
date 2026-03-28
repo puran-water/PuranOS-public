@@ -235,7 +235,7 @@ unification projects.
 
 ## Schema as memory
 
-The three-layer model that replaces a separate "memory system":
+The three-layer persistence model:
 
 ```
 ┌─────────────────────────────────────────────────────┐

@@ -306,17 +306,18 @@ attempts to re-structure it at retrieval time.
 
 ## The three-layer model
 
-PuranOS replaces the "memory system" concept with three persistence layers, each
-serving a distinct temporal and structural purpose.
+PuranOS uses three persistence layers, each serving a distinct temporal and
+structural purpose.
 
-| Layer | What it stores | Implementation | Replaces |
-|---|---|---|---|
-| Session persistence | Conversational continuity within a task | Per-thread context (email thread, project session) | Conversation memory |
-| PM tool persistence | Task-level state: owner, status, blockers, approvals, due dates | OpenProject work packages | Task tracking memory |
-| Application schemas | Domain-level facts: equipment specs, vendor quotes, maintenance history, plant parameters | Postgres-backed tools (enterprise OSS + purpose-built) | Knowledge base / RAG |
+| Layer | What it stores | Implementation |
+|---|---|---|
+| Session persistence | Conversational continuity within a task | Per-thread context (email thread, project session) |
+| PM tool persistence | Task-level state: owner, status, blockers, approvals, due dates | OpenProject work packages |
+| Application schemas | Domain-level facts: equipment specs, vendor quotes, maintenance history, plant parameters | Postgres-backed tools (enterprise OSS + purpose-built) |
 
-Together, these three layers provide everything a memory system promises —
-without the garbage accumulation, ontology drift, or maintenance burden.
+Together, these three layers provide conversational continuity, task tracking,
+and domain knowledge — without garbage accumulation, ontology drift, or
+maintenance burden.
 
 ### Session persistence
 
