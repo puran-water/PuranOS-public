@@ -52,7 +52,7 @@ The `processeng-workspace` contains the bulk of the domain-specific engineering 
 
 Stream state (process stream data) is Postgres-primary, stored in the `stream_snapshot` table via engineering-mcp tools. Filesystem JSON export is available for local tooling but is not the durable store. The `plant-state-skill` provides the workflow SOP for stream reasoning.
 
-This is supported by shared utilities in `libs/engineering-utils/`, which provides 23 contract schemas as Pydantic models with generated JSON Schema mirrors, plus 98 Postgres table schemas introspected from the live databases.
+This is supported by shared utilities in `libs/engineering-utils/`, which provides 26 contract schemas as Pydantic models with generated JSON Schema mirrors, plus 111 Postgres table schemas introspected from the live databases across 7 databases.
 
 Two worktree themes are especially important now:
 
@@ -65,7 +65,7 @@ At the monorepo level, that means the engineering stack is converging on reusabl
 
 | Server | Role |
 |--------|------|
-| `ontology-mcp` | Universal read layer across all 6 Postgres databases. Tools: `get_object`, `list_objects`, `resolve_display_fields`, `find_related`, `validate_action`, `list_allowed_actions`, `classify_equipment`, `rename_project`. Resources: equipment dossier (single traversal across all DBs), project summary, neighbor graph. Prompts: `explore_entity`, `lifecycle_audit`. 198 typed links, 19 governed actions, 21 lifecycle state machines. |
+| `ontology-mcp` | Cross-domain graph resolution across all 7 Postgres databases. Tools: `get_object`, `list_objects`, `find_related` (depth 1-3, `system.table` format), `get_entity_context` (unified context packet), `record_decision` (reasoning memory), `validate_action`, `list_allowed_actions` (subjects-based matching), `classify_equipment`, `rename_project`. Resources: neighbor graph, action details, persona capabilities. Prompts: `explore_entity`, `lifecycle_audit`. 200 typed links, 20 governed actions, 20 lifecycle state machines. |
 
 ### Compliance, Finance, and Growth
 

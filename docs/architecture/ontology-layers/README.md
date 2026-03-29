@@ -358,12 +358,12 @@ A schema catalog tells an agent what an equipment position is and what a vendor 
 
 ### Link catalog
 
-A generated catalog of 198 typed relationships across all databases. Each link declares source, target, join mechanism, cardinality, and semantics:
+A generated catalog of 200 typed relationships across all databases. Each link declares source, target, join mechanism, cardinality, and semantics:
 
 | Join Kind | Count | Description |
 |-----------|-------|-------------|
-| `foreign_key` | 129 | Intra-DB FK constraints introspected from live databases |
-| `bridge_key` | 54 | Cross-DB joins via `equipment_uid`, `project_ref`, `vendor_quote_id`, etc. |
+| `foreign_key` | 136 | Intra-DB FK constraints introspected from live databases |
+| `bridge_key` | 49 | Cross-DB joins via `equipment_uid`, `project_ref`, `vendor_quote_id`, etc. |
 | `external_ref` | 15 | Links to Atlas CMMS, InvenTree, OpenProject (no local FK) |
 
 The catalog is generated at build time from two sources: FK constraints parsed from SQL DDL, and a hand-curated bridge-key seed file that classifies cross-DB column matches with semantic labels (HAS, MONITORS, CONTROLS, SOURCED_FROM, etc.).
@@ -383,13 +383,17 @@ The owner of the write model owns the link manifest. Link declarations live next
 
 ### Action catalog
 
-19 governed mutations declared in domain-local `ontology.actions.yaml` files. Each action specifies inputs, preconditions (referencing lifecycle state machines), and effects:
+20 governed mutations declared in domain-local `ontology.actions.yaml` files. Each action specifies inputs, preconditions (referencing lifecycle state machines), effects, and a `subjects` list naming the entity types it operates on:
 
 | Server | Actions |
 |--------|---------|
 | equipment-identity-mcp | `create_equipment_position`, `rename_equipment_tag`, `commission_asset_instance`, `update_equipment_lifecycle` |
 | procurement-mcp | `register_project`, `create_process_datasheet`, `supersede_datasheet_revision`, `award_vendor_quote`, `record_cost_observation` |
-| compliance-mcp | `record_monitoring_result`, `open_exceedance`, `close_exceedance` |
+| compliance-mcp | `record_observation`, `assess_value`, `open_nonconformance`, `close_nonconformance`, `submit_compliance_report` |
+| contractor-management-mcp | `execute_contract`, `open_claim`, `resolve_claim`, `record_change_order` |
+| ontology-mcp | `rename_project`, `record_decision` |
+
+The `subjects` field enables exact matching when agents ask "what actions apply to this entity?" — replacing heuristic input-name matching.
 
 Preconditions reference lifecycle state machines auto-generated from CHECK constraints in the Postgres schemas:
 
@@ -403,7 +407,7 @@ Every governed mutation emits an append-only action event with precondition snap
 
 ### Lifecycle state machines
 
-21 lifecycle definitions auto-generated from CHECK enum constraints in the 98 Postgres table schemas. These define the valid state progressions for objects like equipment positions, vendor quotes, process datasheets, and exceedance events:
+20 lifecycle definitions auto-generated from CHECK enum constraints in the 111 Postgres table schemas. These define the valid state progressions for objects like equipment positions, vendor quotes, process datasheets, and compliance submissions:
 
 ```
 equipment_position: design → procurement → construction → commissioning → operations → decommissioned
@@ -414,15 +418,36 @@ exceedance_event: open → draft_report → submitted → closed
 
 ### ontology-mcp: cross-domain graph resolution
 
-A read-only MCP server that connects to all six Postgres databases and resolves cross-domain relationships. It exposes:
+An MCP server that connects to all seven Postgres databases, resolves cross-domain relationships, and records decision traces. It exposes:
 
 - **Resource template**: `ontology://neighbors/{object_type}/{id}` — traverses the link catalog, returns neighbors across databases
 - **Resource**: `ontology://schema/catalog` — the full link and action catalog
 - **Resource template**: `ontology://actions/{action_name}` — action details with preconditions and effects
 - **Resource template**: `ontology://persona/{persona_name}/capabilities` — servers and actions available to a persona
-- **Tools**: `find_related`, `get_link_catalog`, `validate_action`, `list_allowed_actions`, `classify_equipment`
+- **Tools**: `find_related` (depth 1-3, `system.table` format), `get_entity_context` (unified context packet), `get_object`, `list_objects`, `validate_action`, `list_allowed_actions`, `classify_equipment`, `record_decision` (reasoning memory), `rename_project`
+- **Prompts**: `explore_entity` (delegates to `get_entity_context`), `lifecycle_audit`
 
-This server intentionally breaks the "one server, one DB" pattern. It is explicitly read-only and exists to resolve cross-domain graphs that no single domain server can see.
+Entity identity supports two formats: plain table names for unambiguous tables (e.g., `equipment_position`), and `system.table` for tables duplicated across databases (e.g., `procurement.project` — the `project` table exists in 4 DBs).
+
+`find_related` supports multi-hop traversal (depth 1-3) with a system-qualified visited set, cycle detection, and `max_results` cap. `get_entity_context` assembles a unified context packet in a single call: entity data, neighbors, lifecycle state (with current value), recent action events, decision history, and applicable governed actions.
+
+`record_decision` captures the reasoning chain behind non-trivial agent decisions (technology selections, compliance determinations, vendor awards) as `decision_trace` + `trace_step` rows in the procurement DB — providing audit, debugging, and cross-session learning capabilities.
+
+This server intentionally breaks the "one server, one DB" pattern. It exists to resolve cross-domain graphs that no single domain server can see, and to record cross-domain audit data (action events and decision traces).
+
+### Design rationale
+
+Several ontology-mcp capabilities exist to solve specific problems that emerged as the system scaled across domains:
+
+**Decision traces (reasoning memory).** The `ontology_action_event` audit trail records *what* agents did — which action, which inputs, which preconditions were checked. It does not record *why*. When a compliance agent flags a nonconformance or a PE lead selects a treatment technology, the reasoning behind that decision is lost when the session ends. Decision traces (`decision_trace` + `trace_step` tables) capture the agent-summarized reasoning chain: what was considered, what tools were called, what was observed, and what conclusion was reached. This serves three purposes: regulatory audit ("why was this limit chosen?"), debugging (replay the trace when an agent makes a bad call), and cross-session learning ("how did we handle a similar situation last time?").
+
+**Multi-hop traversal (depth 1-3).** Impact analysis questions — "what is affected if this pump fails?" — require traversing equipment → alarm definitions → control loops → downstream equipment → compliance points. With depth-1 traversal, agents must call `find_related` repeatedly, manually chaining results and managing visited sets. Depth-N traversal with a system-qualified visited set, cycle detection, and result cap makes this a single tool call. The depth is capped at 3 to prevent runaway expansion across the 200-link graph.
+
+**Entity context assembly.** Before making any decision about an entity, agents need its current data, neighbors, lifecycle state, recent action events, and decision history. This was previously 4-5 sequential tool calls that every agent repeated. `get_entity_context` runs these queries concurrently and returns a unified context packet, reducing latency and ensuring every agent gets a consistent situation report.
+
+**System-qualified entity identity.** Three tables — `project`, `designator`, and `document_attachment` — exist in multiple databases with different schemas and different primary keys. `project` in the procurement DB is keyed by `id`; in the compliance DB it is keyed by `ref`. Without disambiguation, `find_related("project", "CCBG-Meerut")` picks up links from all four databases indiscriminately. The `system.table` format (e.g., `procurement.project`) resolves this. Unambiguous tables still work with plain names.
+
+**Subjects metadata on governed actions.** The original `list_allowed_actions` used heuristic matching: if any action input ended in `_id`, the action was considered relevant to any entity type. This overmatched badly — every action appeared relevant to everything. Conversely, actions using `project_ref` (not `project_id`) were missed for project-scoped queries. The `subjects` list on each action declaration provides exact matching with no heuristics.
 
 ### Compile-time, not runtime
 
@@ -446,7 +471,7 @@ All three sources converge on a canonical set of shared schemas that define the 
 │  Source 1:          Source 2:          Source 3:          │
 │  Enterprise OSS     Shared Pydantic    Custom Domain     │
 │  (OpenProject,      Contracts          Schemas           │
-│   CRM, InvenTree,   (23 generated      (procurement,     │
+│   CRM, InvenTree,   (26 generated      (procurement,     │
 │   Atlas CMMS)       schemas)           bid review)       │
 │         |                |                  |            │
 │         +----------------+------------------+            │
@@ -465,7 +490,7 @@ All three sources converge on a canonical set of shared schemas that define the 
 │       Retained: artifact-envelope . taxonomy . tags      │
 │                          |                               │
 │              Graph-and-action layer                      │
-│              (198 typed links, 19 governed actions)      │
+│              (200 typed links, 20 governed actions)      │
 │                          |                               │
 │              Every tool and agent                        │
 │              speaks this entity model                    │
@@ -500,7 +525,7 @@ The narrow-waist approach has a second advantage beyond integration cost. Becaus
 
 Shared schemas follow a simple governance model:
 
-1. **Pydantic models** are the source of truth for engineering entity definitions. They define types, constraints, and validation logic in code. Currently 23 contract schemas.
+1. **Pydantic models** are the source of truth for engineering entity definitions. They define types, constraints, and validation logic in code. Currently 26 contract schemas.
 2. **JSON Schema mirrors** are generated from the Pydantic models via `generate_schemas.py`. Each carries `$id: "https://puranwater.com/schemas/{filename}"` as a canonical logical identifier.
 3. **Breaking changes** require a version bump and migration. Fields can be added without a version bump. Fields cannot be removed or renamed without one.
 4. **Conformance tests** verify that MCP server outputs match the shared schemas. These run in CI.
