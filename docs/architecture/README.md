@@ -67,7 +67,17 @@ Persona discovery is now more dynamic than earlier repo snapshots. The runtime c
 
 Skills encode repeatable work. They make the system more valuable over time because expertise is captured once and reused many times.
 
-### 5. Orchestration Layer
+### 5. Knowledge Layer
+
+Not all relevant context reduces to typed fields in a schema'd database. Meeting synthesis, design rationale, competitive intelligence, lessons learned, and vendor evaluations are knowledge artifacts that need to be synthesized, linked, and queried — not filed as records or embedded in a vector store.
+
+The Knowledge Wiki (Obsidian-based, LLM-maintained) provides this layer. Agents ingest raw sources, compile them into linked markdown articles, and maintain the wiki through scheduled reconciliation and linting. Humans browse via Obsidian's web interface. The mcpvault MCP server gives agents filesystem-native access through 15 tools.
+
+Multi-vault architecture separates knowledge by concern (operations, engineering, commercial) with ephemeral project vaults provisioned on demand. The wiki complements Paperless-NGX: documents needing cross-system reference IDs go into Paperless; synthesized knowledge goes into the wiki.
+
+See [Knowledge Wiki](../approach/knowledge-wiki.md) for the full thesis.
+
+### 6. Orchestration Layer
 
 The orchestration layer is where inbound events become controlled execution:
 
@@ -85,12 +95,13 @@ See [Agent Runtime](agent-runtime/README.md).
 
 ## The Most Important Design Choice
 
-PuranOS uses a hybrid state model:
+PuranOS uses a hybrid state model with three substrates:
 
 - OpenProject holds long-running collaborative project state.
 - PostgreSQL holds short-lived execution and reliability state.
+- The Knowledge Wiki holds synthesized unstructured context — meeting synthesis, design rationale, competitive intelligence, lessons learned — that does not reduce to typed database fields.
 
-That split is not incidental. It is what allows the system to be both understandable to humans and reliable for agents.
+That split is not incidental. Schema'd databases handle canonical objects with typed fields and known relationships. The coordination substrate handles task state and delegation. The Knowledge Wiki handles the qualitative context that agents need but that no schema can capture. Each substrate serves a distinct class of concern, and overloading any one of them with the others' responsibilities degrades all of them.
 
 ## Architecture Documents
 
@@ -104,7 +115,7 @@ That split is not incidental. It is what allows the system to be both understand
 
 The architectural choices documented here are backed by specific design philosophy and research:
 
-- [Why PuranOS Is Built This Way](../approach/README.md) — the five architectural bets
+- [Why PuranOS Is Built This Way](../approach/README.md) — the six architectural bets
 - [Schema Over Memory](../approach/schema-over-memory.md) — why schema-first approaches outperform memory/RAG
 - [Coordination Substrate](../approach/coordination-substrate.md) — why OpenProject, backed by research
 - [Research Index](../research/README.md) — detailed evidence and counter-evidence

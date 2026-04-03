@@ -21,7 +21,7 @@ systems, it builds the schema'd substrate first and makes AI a native
 consumer of that substrate.
 
 
-## The five architectural bets
+## The six architectural bets
 
 ### 1. Schema'd state over memory
 
@@ -42,7 +42,38 @@ Link: [Schema Over Memory](schema-over-memory.md) — the flagship document
 explaining this thesis in detail.
 
 
-### 2. PM tool as coordination substrate
+### 2. Knowledge Wiki for unstructured context
+
+Not all relevant context fits in a schema'd database. Meeting synthesis,
+research papers, competitive intel, design notes, decision rationale — these
+are knowledge artifacts that don't belong in OpenProject, CRM, or Paperless.
+
+The Knowledge Wiki is an Obsidian-based system where LLM agents ingest raw
+sources, compile them into linked markdown articles with backlinks, and
+iteratively enhance the wiki through compilation, Q&A, and linting. This is
+not summarization or retrieval — it is active synthesis. Raw transcripts,
+papers, and notes become interlinked articles that are more useful than the
+originals.
+
+Multi-vault architecture separates knowledge by concern — operations,
+engineering, commercial — with ephemeral project vaults provisioned on demand
+and archived at closeout. Agents are the primary authors; humans browse via
+Obsidian's web UI.
+
+The wiki complements Paperless-NGX: Paperless holds documents needing a
+document ID for cross-system reference (permits, contracts, submittals). The
+wiki holds knowledge meant to be synthesized, linked, and queried (lessons
+learned, design rationale, competitive intelligence, vendor evaluations).
+
+Implemented via mcpvault MCP server (filesystem-native, 15 tools) for agent
+access and Obsidian Docker for human browsing. Both share the same markdown
+filesystem — no sync layer, no eventual consistency. Inspired by Karpathy's
+LLM Knowledge Base pattern.
+
+Link: [Knowledge Wiki](knowledge-wiki.md)
+
+
+### 3. PM tool as coordination substrate
 
 A project management system (OpenProject) serves as the shared board for
 human and AI bidirectional task delegation.
@@ -60,7 +91,7 @@ interface.
 Link: [Coordination Substrate](coordination-substrate.md)
 
 
-### 3. Skills as captured expertise
+### 4. Skills as captured expertise
 
 Reusable operating procedures encode how work should be done, not just what
 tools to call.
@@ -78,7 +109,7 @@ specific MCP tools required at each step.
 Link: [Skills as Expertise](skills-as-expertise.md)
 
 
-### 4. Engineering engines as first-class citizens
+### 5. Engineering engines as first-class citizens
 
 Deterministic simulation engines are infrastructure, not afterthoughts.
 
@@ -99,7 +130,7 @@ Both engines provide:
 Link: [Engineering Engines](engineering-engines.md)
 
 
-### 5. Tool-level governance
+### 6. Tool-level governance
 
 Side-effect permissions are enforced at the MCP server boundary, not in
 prompts.
@@ -167,12 +198,12 @@ monitor the user.
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  The Approach (Why)                                             │
-│  Schema'd state · Coordination substrate · Skills · Engines    │
-│  Standards alignment · Tool governance                          │
+│  Schema'd state · Knowledge wiki · Coordination substrate      │
+│  Skills · Engines · Standards alignment · Tool governance       │
 ├─────────────────────────────────────────────────────────────────┤
 │  The Architecture (How)                                         │
-│  Persona boundaries · Ontology layers · Hybrid state model      │
-│  MCP server contracts · Orchestration runtime                   │
+│  Persona boundaries · Ontology layers · Knowledge layer         │
+│  Hybrid state model · MCP server contracts · Orchestration      │
 ├─────────────────────────────────────────────────────────────────┤
 │  The Evidence (Research backing)                                │
 │  Agent coordination research · Schema vs memory literature      │
@@ -223,16 +254,18 @@ The recommended reading order depends on your interest.
 **Understand the thesis:**
 
 1. [Schema Over Memory](schema-over-memory.md) — the central argument
-2. [Coordination Substrate](coordination-substrate.md) — why OpenProject,
+2. [Knowledge Wiki](knowledge-wiki.md) — closing the gap for unstructured
+   context
+3. [Coordination Substrate](coordination-substrate.md) — why OpenProject,
    backed by research
 
 **Understand the operating model:**
 
-3. [Skills as Expertise](skills-as-expertise.md) — how institutional
+4. [Skills as Expertise](skills-as-expertise.md) — how institutional
    knowledge becomes machine-executable
-4. [Engineering Engines](engineering-engines.md) — how engineering
+5. [Engineering Engines](engineering-engines.md) — how engineering
    computation is treated as infrastructure
-5. [Standards and Conformance](standards-and-conformance.md) — how schemas
+6. [Standards and Conformance](standards-and-conformance.md) — how schemas
    map to industry consensus
 
 **Understand the architecture:**

@@ -67,6 +67,14 @@ At the monorepo level, that means the engineering stack is converging on reusabl
 |--------|------|
 | `ontology-mcp` | Cross-domain graph resolution across all 7 Postgres databases. Tools: `get_object`, `list_objects`, `find_related` (depth 1-3, `system.table` format), `get_entity_context` (unified context packet), `record_decision` (reasoning memory), `validate_action`, `list_allowed_actions` (subjects-based matching), `classify_equipment`, `rename_project`. Resources: neighbor graph, action details, persona capabilities. Prompts: `explore_entity`, `lifecycle_audit`. 200 typed links, 20 governed actions, 20 lifecycle state machines. |
 
+### Knowledge and Retrieval
+
+| Server | Role |
+|--------|------|
+| `mcpvault` (obsidian-wiki) | Filesystem-native access to the Obsidian-based Knowledge Wiki. 15 tools for article creation, content updates, backlink management, full-text search, metadata queries, and linting operations. Operates directly on markdown files — no intermediate database. Supports multi-vault architecture (operations, engineering, commercial, ephemeral project vaults). |
+| `knowledge-base` | Semantic search over curated knowledge base collections |
+| `rag-backend` | Retrieval-augmented generation for document-level context |
+
 ### Compliance, Finance, and Growth
 
 Additional workspaces support:
@@ -74,7 +82,6 @@ Additional workspaces support:
 - compliance calculations and reporting
 - lead generation and external opportunity discovery
 - project finance workflows
-- knowledge and retrieval
 
 ## OpenProject as a First-Class Collaboration Server
 

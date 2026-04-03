@@ -10,6 +10,8 @@ Building an AI-native industrial firm requires a properly schema'd data substrat
 
 This avoids the "Palantir-style" rework where firms with ad-hoc systems must later unify their ontology. The ontology exists by construction — it is the schema of the tools themselves.
 
+Where context does not reduce to typed fields — meeting synthesis, design rationale, competitive intelligence, lessons learned — a Knowledge Wiki (Obsidian-based, LLM-maintained) provides the complementary layer: agents compile raw sources into linked markdown articles, and humans browse via Obsidian's web UI.
+
 ## Why This Repo Exists
 
 Most industrial firms do not suffer from a lack of software. They suffer from fragmented execution:
@@ -68,7 +70,7 @@ That split keeps project work legible to humans without sacrificing the exact se
 ## Start Here
 
 **Understand the approach:**
-- [Why PuranOS Is Built This Way](docs/approach/README.md) — the five architectural bets
+- [Why PuranOS Is Built This Way](docs/approach/README.md) — the six architectural bets
 - [Schema Over Memory](docs/approach/schema-over-memory.md) — the flagship thesis
 
 **See the architecture:**
@@ -88,6 +90,7 @@ That split keeps project work legible to humans without sacrificing the exact se
 
 - [Why PuranOS Is Built This Way](docs/approach/README.md)
 - [The Primacy of Schema'd State](docs/approach/schema-over-memory.md)
+- [Knowledge Wiki for Unstructured Context](docs/approach/knowledge-wiki.md)
 - [OpenProject as Coordination Substrate](docs/approach/coordination-substrate.md)
 - [Why Skills Compound](docs/approach/skills-as-expertise.md)
 - [First-Class Engineering Computation](docs/approach/engineering-engines.md)
