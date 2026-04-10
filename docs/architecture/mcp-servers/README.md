@@ -71,7 +71,7 @@ At the monorepo level, that means the engineering stack is converging on reusabl
 
 | Server | Role |
 |--------|------|
-| `mcpvault` (obsidian-wiki) | Filesystem-native access to the Obsidian-based Knowledge Wiki. 15 tools for article creation, content updates, backlink management, full-text search, metadata queries, and linting operations. Operates directly on markdown files — no intermediate database. Supports multi-vault architecture (operations, engineering, commercial, ephemeral project vaults). |
+| `wiki-graph` (wiki-global) | MCP access to the file-backed Knowledge Wiki — a markdown vault (Obsidian-compatible format) with wikilink graph traversal. Fork of mcpvault. 15 file I/O tools (read, write, patch, search, frontmatter, tags, move, delete) + 8 graph tools (`resolve_wikilink`, `backlinks`, `forwardlinks`, `neighbors`, `traverse`, `find_path`, `search_traverse`, `fragment`) + 2 health tools (`unresolved_links`, `graph_statistics`) + atomic `rename_with_link_updates`. Resources: graph stats, note manifest, orphan list, hub notes. Operates directly on markdown files — no intermediate database. Default deployment is a single shared `professional` vault; optional scoped `wiki-project` / `wiki-asset` servers for materialized read-only corpora. Agent-only access surface — no human UI. |
 | `knowledge-base` | Semantic search over curated knowledge base collections |
 | `rag-backend` | Retrieval-augmented generation for document-level context |
 

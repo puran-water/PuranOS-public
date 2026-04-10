@@ -48,27 +48,37 @@ Not all relevant context fits in a schema'd database. Meeting synthesis,
 research papers, competitive intel, design notes, decision rationale — these
 are knowledge artifacts that don't belong in OpenProject, CRM, or Paperless.
 
-The Knowledge Wiki is an Obsidian-based system where LLM agents ingest raw
-sources, compile them into linked markdown articles with backlinks, and
-iteratively enhance the wiki through compilation, Q&A, and linting. This is
-not summarization or retrieval — it is active synthesis. Raw transcripts,
-papers, and notes become interlinked articles that are more useful than the
-originals.
+The Knowledge Wiki is a file-backed markdown vault (Obsidian-compatible
+format) exposed to agents through the `wiki-graph` MCP server. Any agent
+drops raw sources into dated channel folders; a dedicated knowledgebase agent
+reconciles raw into compiled articles on a nightly schedule, maintains the
+index, and appends to an operations log. Retrieval runs over wikilinks via
+graph traversal (`search_traverse`, `backlinks`, `fragment`), not vector
+similarity. This is not summarization or retrieval — it is active synthesis.
+Raw transcripts, emails, and notes become interlinked compiled articles that
+are more useful than the originals.
 
-Multi-vault architecture separates knowledge by concern — operations,
-engineering, commercial — with ephemeral project vaults provisioned on demand
-and archived at closeout. Agents are the primary authors; humans browse via
-Obsidian's web UI.
+The default deployment is a single shared `professional` vault; optional
+scoped servers (`wiki-project`, `wiki-asset`) can expose materialized
+read-only corpora for specific projects or assets when hard isolation is
+needed. Agents are the only writers and the only readers. Humans query the
+wiki by asking an agent — not by opening the vault directly. Earlier
+iterations exposed an Obsidian desktop UI on OCI for human browsing; that
+path was retired when it became clear that the retrieval surface agents
+actually use is the MCP tool contract, not the desktop app.
 
 The wiki complements Paperless-NGX: Paperless holds documents needing a
-document ID for cross-system reference (permits, contracts, submittals). The
-wiki holds knowledge meant to be synthesized, linked, and queried (lessons
-learned, design rationale, competitive intelligence, vendor evaluations).
+document ID for cross-system reference (permits, contracts, submittals).
+The wiki holds knowledge meant to be synthesized, linked, and queried
+(lessons learned, design rationale, competitive intelligence, vendor
+evaluations). The wiki never duplicates data that a structured MCP server
+already owns — twenty-crm, openproject-mcp, paperless-ngx, compliance DB,
+quickbooks, and inventory MCPs stay the source of truth for their domains.
 
-Implemented via mcpvault MCP server (filesystem-native, 15 tools) for agent
-access and Obsidian Docker for human browsing. Both share the same markdown
-filesystem — no sync layer, no eventual consistency. Inspired by Karpathy's
-LLM Knowledge Base pattern.
+Implemented via the `wiki-graph` MCP server — a fork of mcpvault adding
+wikilink graph traversal, fragment reads, safe rename-with-link-updates,
+health tools, and ambient MCP resources on top of the 15 mcpvault file I/O
+primitives. Inspired by Karpathy's LLM Knowledge Base pattern.
 
 Link: [Knowledge Wiki](knowledge-wiki.md)
 
