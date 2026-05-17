@@ -61,7 +61,7 @@ The `processeng-workspace` contains the bulk of the domain-specific engineering 
 
 Stream state (process stream data) is Postgres-primary, stored in the `stream_snapshot` table via engineering-mcp tools. Filesystem JSON export is available for local tooling but is not the durable store. The `plant-state-skill` provides the workflow SOP for stream reasoning.
 
-This is supported by shared utilities in `libs/engineering-utils/`, which provides 32 contract schemas as Pydantic models with generated JSON Schema mirrors (engineering, instrumentation, compliance, project controls, project finance, contractor management, datasheet, document attachment, and inter-system exchange), plus 118 Postgres table schemas introspected from the live databases across 7 databases.
+This is supported by shared utilities in `libs/engineering-utils/`, which provides 32 contract schemas as Pydantic models with generated JSON Schema mirrors (engineering, instrumentation, compliance, project controls, project finance, contractor management, datasheet, document attachment, and inter-system exchange), plus 161 Postgres table schemas introspected from the live databases across 8 databases.
 
 Two worktree themes are especially important now:
 
@@ -74,7 +74,7 @@ At the monorepo level, that means the engineering stack is converging on reusabl
 
 | Server | Role |
 |--------|------|
-| `ontology-mcp` | Universal read layer across all 7 Postgres databases — domain servers (engineering, procurement, compliance, equipment-identity, contractor-management, project-controls, project-finance) remain write-only on their tables; ontology-mcp serves ~50 read tools that traverse the typed link catalog. Tools: `get_object`, `list_objects`, `find_related` (depth 1-3, `system.table` format), `get_entity_context` (unified context packet), `record_decision` (reasoning memory), `validate_action`, `list_allowed_actions` (subjects-based matching), `classify_equipment`, `rename_project`. Resources: neighbor graph, action details, persona capabilities. Prompts: `explore_entity`, `lifecycle_audit`. 174 typed links, 20 governed actions, 20 lifecycle state machines. |
+| `ontology-mcp` | Universal read layer across all 8 Postgres databases (compliance_mcp, contractor_management, engineering_mcp, equipment_identity, procurement, project_controls, project_finance, tally_accounting) — domain servers remain write-only on their tables; ontology-mcp serves ~50 read tools that traverse the typed link catalog. Tools: `get_object`, `list_objects`, `find_related` (depth 1-3, `system.table` format), `get_entity_context` (unified context packet), `record_decision` (reasoning memory), `validate_action`, `list_allowed_actions` (subjects-based matching), `classify_equipment`, `rename_project`. Resources: neighbor graph, action details, persona capabilities. Prompts: `explore_entity`, `lifecycle_audit`. 174 typed links, 20 governed actions, 20 lifecycle state machines. |
 
 ### Knowledge and Retrieval
 
