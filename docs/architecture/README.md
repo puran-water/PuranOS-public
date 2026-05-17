@@ -46,7 +46,7 @@ Two especially important engineering engines now follow the same broad pattern:
 - QSDsan as a multi-interface biological/process simulation engine
 - WaterTAP as a session-persistent orchestration engine for treatment and costing workflows
 
-Both increasingly rely on `libs/engineering-utils/` for shared bridge logic, converters, and downstream handoff semantics. That library now provides 16 contract schemas (from 12 model modules) covering engineering, instrumentation, compliance, project controls, and inter-system exchange — generated from Pydantic models and published as JSON Schema with canonical URIs at `puranwater.com/schemas/`.
+Both increasingly rely on `libs/engineering-utils/` for shared bridge logic, converters, and downstream handoff semantics. That library now provides 32 contract schemas covering engineering, instrumentation, compliance, project controls, project finance, contractor management, datasheet contracts, polymorphic document attachment, and inter-system exchange — generated from Pydantic models and published as JSON Schema with canonical URIs at `puranwater.com/schemas/`. ASM2D steady-state biological treatment (MLE, MBR-MLE, MBR-MLE_POST templates) is now solved in WaterTAP with an SRT-as-constraint formulation that reaches IPOPT optimal in seconds; QSDsan retains anaerobic / ADM1 / dynamic LCA scope.
 
 See [MCP Servers](mcp-servers/README.md).
 
@@ -102,6 +102,10 @@ PuranOS uses a hybrid state model with three substrates:
 - The Knowledge Wiki holds synthesized unstructured context — meeting synthesis, design rationale, competitive intelligence, lessons learned — that does not reduce to typed database fields.
 
 That split is not incidental. Schema'd databases handle canonical objects with typed fields and known relationships. The coordination substrate handles task state and delegation. The Knowledge Wiki handles the qualitative context that agents need but that no schema can capture. Each substrate serves a distinct class of concern, and overloading any one of them with the others' responsibilities degrades all of them.
+
+## Client-Facing Review Surface
+
+The schema'd state has a deliberate read surface for non-agent consumers: a NocoDB read-only window across the six canonical operational databases and twenty-six client-relevant tables (equipment positions, vendor quotes, compliance points, project-controls baselines, contractor management SOV lines, and more). The surface is fronted by Cloudflare Access for tenanted authentication. Clients see exactly the state agents see — without exports, copies, or stale snapshots. A separate phase-write proxy lets clients return structured input back into the system (review comments, vendor selections, basis-of-design overrides) through the same surface, with every write audited against lifecycle preconditions on the destination table. The design intent is to avoid the usual transcription tax of converting structured state into PDFs and back into structured state.
 
 ## Architecture Documents
 

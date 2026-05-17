@@ -119,6 +119,15 @@ Generates equipment lists, I&C schedules, and control philosophy
 documents from the current design state. Reads from stream state files
 and engineering results, producing typed artifact envelopes.
 
+### pe-narrative (engineering prose)
+
+Owns the narrative-side companion to pe-deliverables: design-basis
+descriptions, system narratives, technology-selection rationale, and
+the engineering prose pillar of the proposal generator. Reads the same
+schema'd state pe-deliverables reads, but produces explanatory engineering
+text bounded to the verified facts in stream state, equipment lists, and
+simulation results — not free-form prose.
+
 ### cost-estimator (parametric costing)
 
 Produces parametric cost estimates linked to equipment items. Reads
@@ -216,7 +225,16 @@ if a persona tries to do out-of-scope work, it lacks the tools.
 ## Beyond engineering
 
 The same pattern applies across the firm. The scopes differ; the
-structure is identical.
+structure is identical. The current monorepo ships roughly twenty
+persona configurations across the four bands below — engineering (`pe-lead`,
+`pe-process`, `pe-separation`, `pe-mechanical`, `pe-cad`, `pe-deliverables`,
+`pe-narrative`, `cost-estimator`), commercial (`sales`, `procurement`,
+`leadgen`, `marketing`, `project-management`), operations (`maintenance`,
+`inventory`, `compliance`), back office (`bookkeeper`, `tax-reviewer`,
+`legal`, `admin`, `project-finance`), plus cross-cutting infrastructure
+agents (`router` for inbound classification, `knowledgebase` for wiki
+reconciliation, the communication-agent runtime). Each is a configuration
+file under `agent-configs/<persona>/` binding the four scopes above.
 
 ### Commercial
 

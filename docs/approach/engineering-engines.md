@@ -267,6 +267,22 @@ but to make the computational basis of a design as transparent as the
 hand calculations it builds on.
 
 
+## Steady-state biology now lives in WaterTAP
+
+The activated-sludge basis (ASM2D, 31 components, MLE / MBR-MLE /
+MBR-MLE_POST process topologies) is solved in WaterTAP, not QSDsan,
+through a steady-state formulation with SRT-as-constraint that reaches
+IPOPT optimal in seconds and converges MLSS to the design target.
+QSDsan retains anaerobic / ADM1 / dynamic LCA scope — situations where
+time-resolved component tracking is the load-bearing requirement. The
+shared `libs/engineering-utils` converter layer carries handoffs across
+both engines without losing balance reports or estimated-field
+provenance. Practically, this means a steady-state biological-treatment
+sizing reaches optimal in seconds with explicit guarantees on residual
+tolerance and credibility metadata propagation; a dynamic anaerobic
+study uses the engine that's actually built for it.
+
+
 ## Further reading
 
 - [Schema Over Memory](schema-over-memory.md) — the schema-validated

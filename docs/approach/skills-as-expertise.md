@@ -166,6 +166,11 @@ Skills add a fourth storage mechanism: machine-executable procedures that persis
 The shift is from expertise as a scarce, perishable resource to expertise as a durable, compounding asset.
 
 
+## Skills in production today
+
+A handful of skills now carry meaningful day-to-day load. `tender_workflow_v1` orchestrates Stages 4-10 of tender response under Hatchet — block-flow topology gate, deterministic Stage 5 executor, steady-state Stage 7b solve, cost-provenance enforcement, pe-lead distribution — without the agent making free-form choices over schema'd inputs. `wwtp-proposals` is the proposal generation skill: a two-pillar architecture (deterministic JSON for equipment lists, sizing, costs, schedules, org charts + narrative JSON for engineering prose) renders through Jinja2 HTML to PDF, with discovery-driven section catalog, paginating block-flow diagrams, embedded OpenProject Gantt charts, and DOCX brand tokens. The BEP V2 design-package skill produces phase-spanning workspace deliverables — canonical row manifests, mass-balance validation, hydraulic-profile feasibility, PE deliverable envelopes — coordinated by a bep-loop CLI orchestrator. The IX-design skill encodes the textile-ZLD train-selection rule (alkalinity vs hardness → WAC_H + DEG + WAC_Na or 2×WAC_Na + acid + DEG, never SBA, never SAC) so the lithology of the influent drives the train rather than the agent's free choice. The pattern across all four: skills constrain where engineering judgment has already settled the question, and stay out of the way where it hasn't.
+
+
 ## Further reading
 
 - [Engineering Engines](engineering-engines.md) — the computation layer that skills orchestrate

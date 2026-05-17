@@ -313,6 +313,28 @@ what, in what order, with whose approval.
 The distinction matters. Overloading any one substrate with concerns it
 was not designed for degrades all of them.
 
+
+## Hatchet as durable workflow execution
+
+OpenProject is the canonical task ledger; Hatchet is the durable
+workflow engine that drives execution underneath it. Long-running
+multi-stage workflows — `tender_workflow_v1` (Stages 4-10 of tender
+response: BFD topology gate → deterministic Stage 5 → steady-state
+solve → cost-provenance enforcement → distribution), the
+transcript-reconciler that turns meeting recordings into typed minutes
+and downstream OpenProject artifacts, and the communication-agent
+(Microsoft Graph webhook ingress → router → skill dispatch) — run
+end-to-end on Hatchet with explicit retry, timeout, and idempotency
+semantics. Durable child tasks survive parent timeouts; advisory locks
+shield against task cancellation during cleanup; schedule timeouts use
+Hatchet engine duration units so a 30-day window doesn't silently
+collapse. An `openproject-mcp` server exposes typed CRUD over the work
+package ledger; a companion `hatchet-mcp` server lets agents start,
+observe, and cancel workflow runs from inside a skill. The split keeps
+OpenProject's user-facing semantics clean (work packages, custom
+fields, types, gates) while letting Hatchet own the operational
+concerns it was built for.
+
 ---
 
 ## Further reading

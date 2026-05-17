@@ -64,7 +64,9 @@ Each MCP server exposes a curated subset of the application's full schema. The s
 
 Industrial process engineering has its own ontology that no off-the-shelf software provides. A CRM does not know what a process stream is. A PM tool does not know what model credibility means. An inventory system does not distinguish between a centrifugal pump and a positive displacement pump at the process engineering level.
 
-PuranOS defines this ontology explicitly through shared Pydantic contract schemas. These live in `libs/engineering-utils/` as Pydantic models; JSON Schema mirrors are generated with canonical `$id` URIs at `https://puranwater.com/schemas/`. Source 2 has expanded from classical engineering schemas to cover instrumentation, compliance, project controls, project finance, contractor management, and inter-system exchange contracts — 26 generated schemas across 7 Postgres databases and 102 tables.
+PuranOS defines this ontology explicitly through shared Pydantic contract schemas. These live in `libs/engineering-utils/` as Pydantic models; JSON Schema mirrors are generated with canonical `$id` URIs at `https://puranwater.com/schemas/`. Source 2 has expanded from classical engineering schemas to cover instrumentation, compliance (jurisdiction-agnostic obligation fulfillment — compliance points, instruments, quantitative limits, sample events, lab results, gate results), project controls (ANSI/EIA-748 earned value), project finance (proforma projections + actuals + variance), contractor management (DBIA contracts, SOV lines, construction QA: submittals, ITPs, punch, commissioning, transmittals, claim events), polymorphic `document_attachment` (per-DB, replacing 13 single-TEXT doc columns), consolidated process datasheet (template + field definitions + value index + single `datasheet_jsonb` replacing 7 JSONB columns), and inter-system exchange contracts — 32 generated schemas across 7 Postgres databases and 118 tables.
+
+Adjacent prior art in the wastewater / water-reuse / desalination schema space includes PyPES (Chapin et al., *Environmental Modelling & Software* 196:106788, Jan 2026, DOI [10.1016/j.envsoft.2025.106788](https://doi.org/10.1016/j.envsoft.2025.106788)) — a peer-reviewed Python class hierarchy + JSON serialization for plant topology from the Stanford WE3 Lab / NAWI / CIFE collaboration. PuranOS borrows the compound-block boundary-port concept from PyPES (`Connection.exit_point` / `entry_point`) to resolve cross-boundary edge termination inside vendor skids, package units, and multi-facility sites — landed as `entry_point_block_id` / `exit_point_block_id` on BFD edges, `source_boundary_unit_tag` / `destination_boundary_unit_tag` on `stream_snapshot`, and a `PfdExpansionEngine.resolve_external_attachment` helper that BFD→PFD orchestration consumes when wiring inbound and outbound edges that cross a compound block. The schemas otherwise diverge in scope: PyPES is a snapshot of a built facility; PuranOS is lifecycle-spanning (proposal → submittal → as-built → operating → decommissioned), compositional at the stream level (31-component vector vs categorical enum), and carries first-class commercial / compliance / project-controls layers absent from PyPES.
 
 ### Stream state (formerly plant-state)
 
@@ -358,15 +360,15 @@ A schema catalog tells an agent what an equipment position is and what a vendor 
 
 ### Link catalog
 
-A generated catalog of 200 typed relationships across all databases. Each link declares source, target, join mechanism, cardinality, and semantics:
+A generated catalog of 174 typed relationships across all databases. Each link declares source, target, join mechanism, cardinality, and semantics:
 
 | Join Kind | Count | Description |
 |-----------|-------|-------------|
-| `foreign_key` | 136 | Intra-DB FK constraints introspected from live databases |
-| `bridge_key` | 49 | Cross-DB joins via `equipment_uid`, `project_ref`, `vendor_quote_id`, etc. |
-| `external_ref` | 15 | Links to Atlas CMMS, InvenTree, OpenProject (no local FK) |
+| `foreign_key` | 106 | Intra-DB FK constraints introspected from live databases |
+| `bridge_key` | 52 | Cross-DB joins via `equipment_uid`, `project_ref`, `vendor_quote_id`, etc. |
+| `external_ref` | 16 | Links to Atlas CMMS, InvenTree, OpenProject (no local FK) |
 
-The catalog is generated at build time from two sources: FK constraints parsed from SQL DDL, and a hand-curated bridge-key seed file that classifies cross-DB column matches with semantic labels (HAS, MONITORS, CONTROLS, SOURCED_FROM, etc.).
+The catalog is generated at build time from two sources: FK constraints introspected from the live PostgreSQL databases, and a hand-curated bridge-key seed file that classifies cross-DB column matches with semantic labels (HAS, MONITORS, CONTROLS, SOURCED_FROM, etc.).
 
 Example edge:
 
@@ -471,7 +473,7 @@ All three sources converge on a canonical set of shared schemas that define the 
 │  Source 1:          Source 2:          Source 3:          │
 │  Enterprise OSS     Shared Pydantic    Custom Domain     │
 │  (OpenProject,      Contracts          Schemas           │
-│   CRM, InvenTree,   (26 generated      (procurement,     │
+│   CRM, InvenTree,   (32 generated      (procurement,     │
 │   Atlas CMMS)       schemas)           bid review)       │
 │         |                |                  |            │
 │         +----------------+------------------+            │
@@ -490,7 +492,7 @@ All three sources converge on a canonical set of shared schemas that define the 
 │       Retained: artifact-envelope . taxonomy . tags      │
 │                          |                               │
 │              Graph-and-action layer                      │
-│              (200 typed links, 20 governed actions)      │
+│              (174 typed links, 20 governed actions)      │
 │                          |                               │
 │              Every tool and agent                        │
 │              speaks this entity model                    │
