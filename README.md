@@ -115,7 +115,13 @@ That split keeps project work legible to humans without sacrificing the exact se
 - [Provisioning Guide](docs/provisioning/README.md)
 - [Communication Agent](docs/runtime/communication-agent/README.md)
 - [OpenProject MCP](docs/servers/openproject-mcp.md)
+- [GIS MCP](docs/servers/gis-mcp.md)
+- [Hydraulic MCP](docs/servers/hydraulic-mcp.md)
 - [OpenProject Service Notes](docs/services/openproject.md)
+
+### Skills
+
+- [Water Network Design](docs/skills/water-network-design.md)
 
 ### Community
 
@@ -135,7 +141,13 @@ It is not a public mirror of the full internal monorepo.
 
 ## Source Snapshot
 
-This documentation export reflects the internal PuranOS monorepo at source commit `091fbee`.
+This documentation export reflects the internal PuranOS monorepo at source commit `b19d0ea` (2026-05-19).
+
+Recent monorepo commits that informed this documentation refresh:
+
+- `b19d0ea` (2026-05-19) — gis-mcp Group-B world search + Group-C raster reasoning (OSS Earth-Engine substitute)
+- `497af5e` (2026-05-18) — pe-water-supply agent + gis-mcp + hydraulic-mcp + water-network-design skill
+- `c43d804` (2026-05-15) — Universal Proposal Pipeline Fix (themes A–K)
 
 ## Contact
 
