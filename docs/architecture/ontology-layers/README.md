@@ -64,7 +64,7 @@ Each MCP server exposes a curated subset of the application's full schema. The s
 
 Industrial process engineering has its own ontology that no off-the-shelf software provides. A CRM does not know what a process stream is. A PM tool does not know what model credibility means. An inventory system does not distinguish between a centrifugal pump and a positive displacement pump at the process engineering level.
 
-PuranOS defines this ontology explicitly through shared Pydantic contract schemas. These live in `libs/engineering-utils/` as Pydantic models; JSON Schema mirrors are generated with canonical `$id` URIs at `https://puranwater.com/schemas/`. Source 2 has expanded from classical engineering schemas to cover instrumentation, compliance (jurisdiction-agnostic obligation fulfillment — compliance points, instruments, quantitative limits, sample events, lab results, gate results), project controls (ANSI/EIA-748 earned value), project finance (proforma projections + actuals + variance), contractor management (DBIA contracts, SOV lines, construction QA: submittals, ITPs, punch, commissioning, transmittals, claim events), polymorphic `document_attachment` (per-DB, replacing 13 single-TEXT doc columns), consolidated process datasheet (template + field definitions + value index + single `datasheet_jsonb` replacing 7 JSONB columns), and inter-system exchange contracts — 32 generated schemas across 8 Postgres databases and 161 tables.
+PuranOS defines this ontology explicitly through shared Pydantic contract schemas. These live in `libs/engineering-utils/` as Pydantic models; JSON Schema mirrors are generated with canonical `$id` URIs at `https://puranwater.com/schemas/`. Source 2 has expanded from classical engineering schemas to cover instrumentation, compliance (jurisdiction-agnostic obligation fulfillment — compliance points, instruments, quantitative limits, sample events, lab results, gate results), project controls (ANSI/EIA-748 earned value), project finance (proforma projections + actuals + variance), contractor management (DBIA contracts, SOV lines, construction QA: submittals, ITPs, punch, commissioning, transmittals, claim events), polymorphic `document_attachment` (per-DB, replacing 13 single-TEXT doc columns), consolidated process datasheet (template + field definitions + value index + single `datasheet_jsonb` replacing 7 JSONB columns), legal contract-twin (clauses, flowdown links, legal facts, scenario runs), and inter-system exchange contracts — 32 generated schemas across 9 Postgres databases and 201 tables.
 
 Adjacent prior art in the wastewater / water-reuse / desalination schema space includes PyPES (Chapin et al., *Environmental Modelling & Software* 196:106788, Jan 2026, DOI [10.1016/j.envsoft.2025.106788](https://doi.org/10.1016/j.envsoft.2025.106788)) — a peer-reviewed Python class hierarchy + JSON serialization for plant topology from the Stanford WE3 Lab / NAWI / CIFE collaboration. PuranOS borrows the compound-block boundary-port concept from PyPES (`Connection.exit_point` / `entry_point`) to resolve cross-boundary edge termination inside vendor skids, package units, and multi-facility sites — landed as `entry_point_block_id` / `exit_point_block_id` on BFD edges, `source_boundary_unit_tag` / `destination_boundary_unit_tag` on `stream_snapshot`, and a `PfdExpansionEngine.resolve_external_attachment` helper that BFD→PFD orchestration consumes when wiring inbound and outbound edges that cross a compound block. The schemas otherwise diverge in scope: PyPES is a snapshot of a built facility; PuranOS is lifecycle-spanning (proposal → submittal → as-built → operating → decommissioned), compositional at the stream level (31-component vector vs categorical enum), and carries first-class commercial / compliance / project-controls layers absent from PyPES.
 
@@ -241,6 +241,10 @@ Full asset financial lifecycle persistence: development projections, operations 
 
 Derived computations (variance analysis, capital call forecasting, asset valuation via trailing EBITDA/FCF) are computed on demand from model runs + actuals — not persisted as base tables.
 
+### Legal contract-twin
+
+In-house-counsel contract model in the dedicated `legal` database, surfaced by `legal-mcp`. Contracts decompose into clauses; clauses carry flowdown links (prime-to-sub obligation propagation) and typed legal facts (LD caps, cure periods, LoL carve-outs, precedence terms). A deterministic scenario engine evaluates contract questions — LD cap application, precedence and later-in-time resolution, vendor cure-period and excusability, limitation-of-liability carve-outs — against the persisted facts, recording each evaluation as an append-only scenario run with a decision trace. All rows are append-only with `reviewed_by` provenance; a `portfolio_query` surface reports upcoming deadlines across the contract portfolio.
+
 ### Schema generation pipeline
 
 Pydantic models in `libs/engineering-utils/` are the source of truth. JSON Schema files are generated artifacts with canonical `$id` URIs at `https://puranwater.com/schemas/{filename}`. This makes schemas machine-linkable and version-controlled from a single Python source.
@@ -290,7 +294,7 @@ PuranOS splits data ownership across six systems, each with exclusive write acce
 
 | System | Owns | Bridge Key |
 |---|---|---|
-| PostgreSQL (6 databases) | Engineering artifacts, stream snapshots, alarms, cost observations, datasheets, equipment registry, contractor management, project controls | `equipment_uid` (UUID) |
+| PostgreSQL (9 databases) | Engineering artifacts, stream snapshots, alarms, cost observations, datasheets, equipment registry, contractor management, project controls, project finance, legal contract-twin | `equipment_uid` (UUID) |
 | OpenProject | Workflow: tasks, punch items, ITPs, commissioning, RFIs, submittals | `openproject_wp_id` |
 | Atlas CMMS | Maintenance execution, PM schedules, failure tracking | `cmms_asset_id` |
 | InvenTree | Parts, inventory, BOMs | `inventree_part_id` |
@@ -360,13 +364,13 @@ A schema catalog tells an agent what an equipment position is and what a vendor 
 
 ### Link catalog
 
-A generated catalog of 174 typed relationships across all databases. Each link declares source, target, join mechanism, cardinality, and semantics:
+A generated catalog of 339 typed relationships across all databases. Each link declares source, target, join mechanism, cardinality, and semantics:
 
 | Join Kind | Count | Description |
 |-----------|-------|-------------|
-| `foreign_key` | 106 | Intra-DB FK constraints introspected from live databases |
-| `bridge_key` | 52 | Cross-DB joins via `equipment_uid`, `project_ref`, `vendor_quote_id`, etc. |
-| `external_ref` | 16 | Links to Atlas CMMS, InvenTree, OpenProject (no local FK) |
+| `foreign_key` | 255 | Intra-DB FK constraints introspected from live databases |
+| `bridge_key` | 65 | Cross-DB joins via `equipment_uid`, `project_ref`, `vendor_quote_id`, etc. |
+| `external_ref` | 19 | Links to Atlas CMMS, InvenTree, OpenProject (no local FK) |
 
 The catalog is generated at build time from two sources: FK constraints introspected from the live PostgreSQL databases, and a hand-curated bridge-key seed file that classifies cross-DB column matches with semantic labels (HAS, MONITORS, CONTROLS, SOURCED_FROM, etc.).
 
@@ -385,7 +389,7 @@ The owner of the write model owns the link manifest. Link declarations live next
 
 ### Action catalog
 
-20 governed mutations declared in domain-local `ontology.actions.yaml` files. Each action specifies inputs, preconditions (referencing lifecycle state machines), effects, and a `subjects` list naming the entity types it operates on:
+29 governed mutations declared in domain-local `ontology.actions.yaml` files. Each action specifies inputs, preconditions (referencing lifecycle state machines), effects, and a `subjects` list naming the entity types it operates on:
 
 | Server | Actions |
 |--------|---------|
@@ -393,6 +397,7 @@ The owner of the write model owns the link manifest. Link declarations live next
 | procurement-mcp | `register_project`, `create_process_datasheet`, `supersede_datasheet_revision`, `award_vendor_quote`, `record_cost_observation` |
 | compliance-mcp | `record_observation`, `assess_value`, `open_nonconformance`, `close_nonconformance`, `submit_compliance_report` |
 | contractor-management-mcp | `execute_contract`, `open_claim`, `resolve_claim`, `record_change_order` |
+| legal-mcp | `ingest_contract_document`, `ingest_clause`, `ingest_verified_clause_atom`, `ingest_flowdown_link`, `mark_verification`, `run_scenario`, `supersede_clause`, `supersede_fact`, `supersede_flowdown_link` |
 | ontology-mcp | `rename_project`, `record_decision` |
 
 The `subjects` field enables exact matching when agents ask "what actions apply to this entity?" — replacing heuristic input-name matching.
@@ -409,7 +414,7 @@ Every governed mutation emits an append-only action event with precondition snap
 
 ### Lifecycle state machines
 
-20 lifecycle definitions auto-generated from CHECK enum constraints in the 111 Postgres table schemas. These define the valid state progressions for objects like equipment positions, vendor quotes, process datasheets, and compliance submissions:
+20 lifecycle definitions auto-generated from CHECK enum constraints in the 201 Postgres table schemas. These define the valid state progressions for objects like equipment positions, vendor quotes, process datasheets, and compliance submissions:
 
 ```
 equipment_position: design → procurement → construction → commissioning → operations → decommissioned
@@ -420,7 +425,7 @@ exceedance_event: open → draft_report → submitted → closed
 
 ### ontology-mcp: cross-domain graph resolution
 
-An MCP server that connects to all seven Postgres databases, resolves cross-domain relationships, and records decision traces. It exposes:
+An MCP server that connects to all nine Postgres databases, resolves cross-domain relationships, and records decision traces. It exposes:
 
 - **Resource template**: `ontology://neighbors/{object_type}/{id}` — traverses the link catalog, returns neighbors across databases
 - **Resource**: `ontology://schema/catalog` — the full link and action catalog
@@ -443,7 +448,7 @@ Several ontology-mcp capabilities exist to solve specific problems that emerged 
 
 **Decision traces (reasoning memory).** The `ontology_action_event` audit trail records *what* agents did — which action, which inputs, which preconditions were checked. It does not record *why*. When a compliance agent flags a nonconformance or a PE lead selects a treatment technology, the reasoning behind that decision is lost when the session ends. Decision traces (`decision_trace` + `trace_step` tables) capture the agent-summarized reasoning chain: what was considered, what tools were called, what was observed, and what conclusion was reached. This serves three purposes: regulatory audit ("why was this limit chosen?"), debugging (replay the trace when an agent makes a bad call), and cross-session learning ("how did we handle a similar situation last time?").
 
-**Multi-hop traversal (depth 1-3).** Impact analysis questions — "what is affected if this pump fails?" — require traversing equipment → alarm definitions → control loops → downstream equipment → compliance points. With depth-1 traversal, agents must call `find_related` repeatedly, manually chaining results and managing visited sets. Depth-N traversal with a system-qualified visited set, cycle detection, and result cap makes this a single tool call. The depth is capped at 3 to prevent runaway expansion across the 200-link graph.
+**Multi-hop traversal (depth 1-3).** Impact analysis questions — "what is affected if this pump fails?" — require traversing equipment → alarm definitions → control loops → downstream equipment → compliance points. With depth-1 traversal, agents must call `find_related` repeatedly, manually chaining results and managing visited sets. Depth-N traversal with a system-qualified visited set, cycle detection, and result cap makes this a single tool call. The depth is capped at 3 to prevent runaway expansion across the 339-link graph.
 
 **Entity context assembly.** Before making any decision about an entity, agents need its current data, neighbors, lifecycle state, recent action events, and decision history. This was previously 4-5 sequential tool calls that every agent repeated. `get_entity_context` runs these queries concurrently and returns a unified context packet, reducing latency and ensuring every agent gets a consistent situation report.
 
@@ -492,7 +497,7 @@ All three sources converge on a canonical set of shared schemas that define the 
 │       Retained: artifact-envelope . taxonomy . tags      │
 │                          |                               │
 │              Graph-and-action layer                      │
-│              (174 typed links, 20 governed actions)      │
+│              (339 typed links, 29 governed actions)      │
 │                          |                               │
 │              Every tool and agent                        │
 │              speaks this entity model                    │
@@ -527,7 +532,7 @@ The narrow-waist approach has a second advantage beyond integration cost. Becaus
 
 Shared schemas follow a simple governance model:
 
-1. **Pydantic models** are the source of truth for engineering entity definitions. They define types, constraints, and validation logic in code. Currently 26 contract schemas.
+1. **Pydantic models** are the source of truth for engineering entity definitions. They define types, constraints, and validation logic in code. Currently 32 contract schemas.
 2. **JSON Schema mirrors** are generated from the Pydantic models via `generate_schemas.py`. Each carries `$id: "https://puranwater.com/schemas/{filename}"` as a canonical logical identifier.
 3. **Breaking changes** require a version bump and migration. Fields can be added without a version bump. Fields cannot be removed or renamed without one.
 4. **Conformance tests** verify that MCP server outputs match the shared schemas. These run in CI.

@@ -46,7 +46,7 @@ Two especially important engineering engines now follow the same broad pattern:
 - QSDsan as a multi-interface biological/process simulation engine
 - WaterTAP as a session-persistent orchestration engine for treatment and costing workflows
 
-Both increasingly rely on `libs/engineering-utils/` for shared bridge logic, converters, and downstream handoff semantics. That library now provides 32 contract schemas covering engineering, instrumentation, compliance, project controls, project finance, contractor management, datasheet contracts, polymorphic document attachment, and inter-system exchange — generated from Pydantic models and published as JSON Schema with canonical URIs at `puranwater.com/schemas/`. ASM2D steady-state biological treatment (MLE, MBR-MLE, MBR-MLE_POST templates) is now solved in WaterTAP with an SRT-as-constraint formulation that reaches IPOPT optimal in seconds; QSDsan retains anaerobic / ADM1 / dynamic LCA scope.
+Both increasingly rely on `libs/engineering-utils/` for shared bridge logic, converters, and downstream handoff semantics. That library now provides 32 contract schemas covering engineering, instrumentation, compliance, project controls, project finance, contractor management, datasheet contracts, polymorphic document attachment, the legal contract-twin, and inter-system exchange — generated from Pydantic models and published as JSON Schema with canonical URIs at `puranwater.com/schemas/`. ASM2D steady-state biological treatment (MLE, MBR-MLE, MBR-MLE_POST templates) is now solved in WaterTAP with an SRT-as-constraint formulation that reaches IPOPT optimal in seconds; QSDsan retains anaerobic / ADM1 / dynamic LCA scope.
 
 See [MCP Servers](mcp-servers/README.md).
 

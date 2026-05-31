@@ -31,7 +31,7 @@ reducing the need for separate AI "memory" systems. The ontology comes from thre
 | Source | Examples | What it provides |
 |--------|----------|-----------------|
 | Enterprise OSS schemas | OpenProject, CRM, inventory, CMMS | Postgres-backed domain ontology per vertical |
-| Shared Pydantic contract schemas | 16 generated schemas: stream-state, equipment-item (OPC UA DI/AAS), model-credibility, alarm definitions (ISA-18.2), cause-effect matrices (ISA-5.2), instrument databases, hydraulic profiles, control execution (ISA-88), HAZOP (IEC 61882), water compliance (NPDES), project controls (EIA-748), 5 Ensaras exchange contracts | Typed engineering objects with known relationships and standards-aligned vocabulary |
+| Shared Pydantic contract schemas | Engineering-core subset of the 32 generated schemas: stream-state, equipment-item (OPC UA DI/AAS), model-credibility, alarm definitions (ISA-18.2), cause-effect matrices (ISA-5.2), instrument databases, hydraulic profiles, control execution (ISA-88), HAZOP (IEC 61882), water compliance (NPDES), project controls (EIA-748), 5 Ensaras exchange contracts | Typed engineering objects with known relationships and standards-aligned vocabulary |
 | Custom domain schemas | Procurement (12-entity relational model), bid spec review (structured evidence chains), compliance (validated regulatory calculations) | Domain logic that no off-the-shelf tool covers |
 
 All exposed via typed MCP tool surfaces. An agent does not need to

@@ -81,9 +81,10 @@ stable, and under operator control.
 
 Industrial engineering has its own ontology that no off-the-shelf software
 provides. PuranOS defines it explicitly through shared Pydantic models that
-generate 20 JSON Schema files with canonical `$id` URIs. This source has expanded
+generate 32 JSON Schema files with canonical `$id` URIs. This source has expanded
 beyond classical engineering schemas to cover instrumentation, compliance,
-project controls, and inter-system exchange contracts.
+project controls, project finance, contractor management, the legal
+contract-twin, and inter-system exchange contracts.
 
 **Stream-state model (formerly plant-state).** A 31-component process stream model
 based on the mASM2d (modified Activated Sludge Model 2d) component basis. Each
@@ -126,8 +127,9 @@ know what level of trust to place in a result. Credibility metadata now also
 includes IDTA AAS "Provision of Simulation Models" fields: license,
 environment, parameterization method, and simulation purpose.
 
-**Beyond the original six.** The engineering schema set has expanded to 16
-generated schemas covering alarm management (ISA-18.2), cause-effect matrices
+**Beyond the original six.** The engineering schema set has expanded well past
+the original core. A representative subset of the 32 generated schemas covers
+alarm management (ISA-18.2), cause-effect matrices
 (ISA-5.2), instrument databases (ISA-5.1/DEXPI), hydraulic profiles, control
 execution (ISA-88/IEC 61131-3), HAZOP studies (IEC 61882), water compliance
 (NPDES), project controls (ANSI/EIA-748), and five Ensaras inter-system

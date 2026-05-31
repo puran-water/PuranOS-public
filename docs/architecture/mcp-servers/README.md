@@ -10,7 +10,7 @@ MCP solves that by centralizing authentication, typed contracts, governance boun
 
 | Primitive | Direction | Purpose | PuranOS usage |
 |-----------|-----------|---------|---------------|
-| **Tools** | Agent → Server | Execute actions with typed inputs/outputs | 200+ tools across 21 servers, all on `fastmcp ≥ 3.0`: simulations, CRUD, governed mutations |
+| **Tools** | Agent → Server | Execute actions with typed inputs/outputs | 200+ tools across 22 servers, all on `fastmcp ≥ 3.0`: simulations, CRUD, governed mutations |
 | **Resources** | Server → Agent | Expose read-only data the agent can pull on demand | `ontology://dossier/equipment/{uid}`, `cmms://workorders/open`, `openproject://project/{id}/summary`, `kb://collections` |
 | **Prompts** | Server → Agent | Structured prompt templates with embedded context | `explore_entity` (ontology neighbor graph + lifecycle + actions), `lifecycle_audit` (state distribution + validation hints) |
 | **Elicitation** | Server → Agent | Request structured input during tool execution — the agent decides how to resolve it | Destructive operation confirmation gates on Atlas CMMS (delete work orders, assets, PM schedules) |
@@ -24,7 +24,7 @@ The practical effect: a maintenance persona can read `cmms://workorders/open` as
 The fleet runs end-to-end on `fastmcp ≥ 3.0` with the full primitive set — tools, resources, elicitation, and prompts — with persistent sessions across calls, structured cancellation, and MCP-native error envelopes. At a glance:
 
 - **Engineering simulation:** the `processeng-workspace` family — QSDsan-engine (anaerobic / ADM1 / dynamic LCA), WaterTAP-engine (canonical steady-state biology + membranes + costing), PHREEQC, CoolProp + fluids, heat-transfer, corrosion, diagramming (DEXPI / SFILES / ISA-5.1 tagging), Mathcad
-- **Domain data (write-side):** `equipment-identity-mcp`, `procurement-mcp`, `compliance-mcp`, `contractor-management-mcp`, `project-controls` (via `pm-analytics`), `project-finance-workspace`, `parametric-costing-mcp`
+- **Domain data (write-side):** `equipment-identity-mcp`, `procurement-mcp`, `compliance-mcp`, `contractor-management-mcp`, `project-controls` (via `pm-analytics`), `project-finance-workspace`, `parametric-costing-mcp`, `legal-mcp`
 - **Read / orchestration:** `ontology-mcp` (universal read), `openproject-mcp`, `hatchet-mcp`, `cpm-mcp`
 - **Knowledge:** `wiki-graph`, `knowledge-base`, `rag-backend`, `paperless-mcp`
 - **Reasoning / extraction:** `rlm-bridge` (Codex-backed multi-thousand-document corpus reasoning, Modal-hosted Docling extract endpoint, ArtifactStore companion MCP for single-pass cross-corpus structured-artifact writes)
@@ -61,7 +61,7 @@ The `processeng-workspace` contains the bulk of the domain-specific engineering 
 
 Stream state (process stream data) is Postgres-primary, stored in the `stream_snapshot` table via engineering-mcp tools. Filesystem JSON export is available for local tooling but is not the durable store. The `plant-state-skill` provides the workflow SOP for stream reasoning.
 
-This is supported by shared utilities in `libs/engineering-utils/`, which provides 32 contract schemas as Pydantic models with generated JSON Schema mirrors (engineering, instrumentation, compliance, project controls, project finance, contractor management, datasheet, document attachment, and inter-system exchange), plus 161 Postgres table schemas introspected from the live databases across 8 databases.
+This is supported by shared utilities in `libs/engineering-utils/`, which provides 32 contract schemas as Pydantic models with generated JSON Schema mirrors (engineering, instrumentation, compliance, project controls, project finance, contractor management, datasheet, document attachment, legal contract-twin, and inter-system exchange), plus 201 Postgres table schemas introspected from the live databases across 9 databases.
 
 Two worktree themes are especially important now:
 
@@ -74,7 +74,7 @@ At the monorepo level, that means the engineering stack is converging on reusabl
 
 | Server | Role |
 |--------|------|
-| `ontology-mcp` | Universal read layer across all 8 Postgres databases (compliance_mcp, contractor_management, engineering_mcp, equipment_identity, procurement, project_controls, project_finance, tally_accounting) — domain servers remain write-only on their tables; ontology-mcp serves ~50 read tools that traverse the typed link catalog. Tools: `get_object`, `list_objects`, `find_related` (depth 1-3, `system.table` format), `get_entity_context` (unified context packet), `record_decision` (reasoning memory), `validate_action`, `list_allowed_actions` (subjects-based matching), `classify_equipment`, `rename_project`. Resources: neighbor graph, action details, persona capabilities. Prompts: `explore_entity`, `lifecycle_audit`. 174 typed links, 20 governed actions, 20 lifecycle state machines. |
+| `ontology-mcp` | Universal read layer across all 9 Postgres databases (compliance_mcp, contractor_management, engineering_mcp, equipment_identity, procurement, project_controls, project_finance, tally_accounting, legal) — domain servers remain write-only on their tables; ontology-mcp serves ~50 read tools that traverse the typed link catalog. Tools: `get_object`, `list_objects`, `find_related` (depth 1-3, `system.table` format), `get_entity_context` (unified context packet), `record_decision` (reasoning memory), `validate_action`, `list_allowed_actions` (subjects-based matching), `classify_equipment`, `rename_project`. Resources: neighbor graph, action details, persona capabilities. Prompts: `explore_entity`, `lifecycle_audit`. 339 typed links, 29 governed actions, 20 lifecycle state machines. |
 
 ### Knowledge and Retrieval
 
@@ -91,6 +91,12 @@ Additional workspaces support:
 - compliance calculations and reporting
 - lead generation and external opportunity discovery
 - project finance workflows
+
+### Legal
+
+| Server | Role |
+|--------|------|
+| `legal-mcp` | In-house-counsel contract-twin over the `legal` Postgres database: models contracts, clauses, flowdown links, and typed legal facts; runs a deterministic scenario engine (LD caps, precedence / later-in-time resolution, vendor cure-period and excusability, LoL carve-outs); append-only provenance with `reviewed_by` and decision traces; `portfolio_query` surfaces upcoming deadlines across the contract portfolio. Write-only for domain data; reads via ontology-mcp. |
 
 ## OpenProject as a First-Class Collaboration Server
 
