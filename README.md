@@ -141,10 +141,11 @@ It is not a public mirror of the full internal monorepo.
 
 ## Source Snapshot
 
-This documentation export reflects the internal PuranOS monorepo at source commit `b19d0ea` (2026-05-19).
+This documentation export reflects the internal PuranOS monorepo at source commit `49cb0a0` (2026-06-11).
 
 Recent monorepo commits that informed this documentation refresh:
 
+- `49cb0a0` (2026-06-11) — engineering-mcp full-fidelity design basis: semantic P&ID compile, UUID-bound alarm/loop/interlock data, lossless DEXPI/Proteus round trip
 - `b19d0ea` (2026-05-19) — gis-mcp Group-B world search + Group-C raster reasoning (OSS Earth-Engine substitute)
 - `497af5e` (2026-05-18) — pe-water-supply agent + gis-mcp + hydraulic-mcp + water-network-design skill
 - `c43d804` (2026-05-15) — Universal Proposal Pipeline Fix (themes A–K)
