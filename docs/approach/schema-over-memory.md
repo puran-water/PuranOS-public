@@ -1,5 +1,7 @@
 # The Primacy of Schema'd State
 
+> Reference essay retained from the earlier documentation. For the October 2026 implementation and access boundaries, see [current capability notes](../current-state.md). Historical counts, deployment examples and research claims here are not a live inventory.
+
 ## Why this exists
 
 Most AI systems try to solve the "enterprise knowledge" problem by building

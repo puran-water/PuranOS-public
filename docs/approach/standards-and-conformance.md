@@ -1,5 +1,7 @@
 # Industrial Standards Alignment
 
+> Reference essay retained from the earlier documentation. For the October 2026 implementation and access boundaries, see [current capability notes](../current-state.md). Historical counts, deployment examples and research claims here are not a live inventory.
+
 ## Why this exists
 
 Purpose-built schemas and OSS tool ontologies must map to industry consensus standards.

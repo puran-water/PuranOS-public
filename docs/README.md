@@ -1,50 +1,43 @@
-# Documentation Index
+# PuranOS documentation
 
-This repository is the public documentation surface for PuranOS.
+Reviewed October 19, 2026. Start with [current capability notes](current-state.md) and the [source snapshot](source-snapshot.json).
 
-## Approach and Design Philosophy
+## Customers and integrations
 
-Why PuranOS is built the way it is — the architectural bets, the research backing, and the reasoning.
+- [Connect your LLM through MCP](integration/mcp.md)
+- [Deliverables for people and agents](integration/deliverables.md)
+- [Public schema catalog](https://puranwater.com/puranos/schemas/)
 
-- [Why PuranOS Is Built This Way](approach/README.md) — gateway to the approach layer
-- [The Primacy of Schema'd State](approach/schema-over-memory.md) — the flagship thesis
-- [OpenProject as Coordination Substrate](approach/coordination-substrate.md) — shared board for human+AI delegation
-- [Why Skills Compound](approach/skills-as-expertise.md) — capturing institutional knowledge
-- [First-Class Engineering Computation](approach/engineering-engines.md) — simulation engines as infrastructure
-- [Industrial Standards Alignment](approach/standards-and-conformance.md) — DEXPI, ISA-95, ISA 5.1
+## Current architecture
 
-## Architecture
+- [Overview](architecture/README.md)
+- [Specialists and handoffs](architecture/personas/README.md)
+- [MCP tools and access boundaries](architecture/mcp-servers/README.md)
+- [Identity and connected records](architecture/ontology-layers/README.md)
+- [Execution and recovery](architecture/agent-runtime/README.md)
 
-How the system is structured — layers, personas, ontology, and hybrid state.
+## Engineering approach
 
-- [Architecture Overview](architecture/README.md)
-- [Agent Runtime](architecture/agent-runtime/README.md)
-- [MCP Servers](architecture/mcp-servers/README.md)
-- [Persona Boundaries](architecture/personas/README.md)
-- [Ontology Layers](architecture/ontology-layers/README.md)
+- [Why the system is built this way](approach/README.md)
+- [Engineering computation](approach/engineering-engines.md)
+- [Skills and reviewed learning](approach/skills-as-expertise.md)
+- [Schema over memory](approach/schema-over-memory.md)
+- [Knowledge wiki](approach/knowledge-wiki.md)
+- [Project coordination](approach/coordination-substrate.md)
+- [Standards and conformance](approach/standards-and-conformance.md)
 
-## Research and Evidence
+## Supporting references
 
-What specific studies say about agent coordination, memory systems, and enterprise AI — including the counter-evidence.
+The research essays and detailed server/runtime notes retain their original context. They are not a live deployment inventory; the current architecture and capability notes above govern the public description of today’s system.
 
-- [Research Index](research/README.md)
-- [Coordination and State](research/coordination-and-state.md)
-- [Schema Over Memory](research/schema-over-memory.md)
-
-## Runtime and Collaboration
-
-- [Communication Agent](runtime/communication-agent/README.md)
-- [Communication Agent Automation](runtime/communication-agent/AUTOMATION.md)
-- [Communication Agent Consolidation Notes](runtime/communication-agent/CONSOLIDATION.md)
+- [Research](research/README.md)
 - [OpenProject MCP](servers/openproject-mcp.md)
-- [OpenProject Service Notes](services/openproject.md)
+- [GIS MCP](servers/gis-mcp.md)
+- [Hydraulic MCP](servers/hydraulic-mcp.md)
+- [Legal MCP](servers/legal-mcp.md)
+- [Runtime reference](runtime/communication-agent/INDEX.md)
+- [Provisioning principles](provisioning/README.md)
+- [Community](community/README.md)
+- [Contributing](../CONTRIBUTING.md) · [Security](../SECURITY.md)
 
-## Community
-
-- [For Curious Industrial Engineers](community/README.md)
-- [The Skill Model](community/skill-contribution-guide.md)
-
-## Repository Policies
-
-- [Contributing](../CONTRIBUTING.md)
-- [Security](../SECURITY.md)
+The [previous detailed documentation](https://github.com/puran-water/PuranOS-public/tree/d116d720454a8fb1d9fc8f5ff5787af9db16edec/docs) remains available as a versioned historical reference.

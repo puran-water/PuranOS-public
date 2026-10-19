@@ -1,5 +1,7 @@
 # Knowledge Wiki for Unstructured Context
 
+> Reference essay retained from the earlier documentation. For the October 2026 implementation and access boundaries, see [current capability notes](../current-state.md). Historical counts, deployment examples and research claims here are not a live inventory.
+
 ## Why this exists
 
 The schema-over-memory thesis holds for canonical objects — equipment, streams,

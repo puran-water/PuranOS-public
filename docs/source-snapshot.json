@@ -1,0 +1,80 @@
+{
+  "reviewed_on": "2026-10-19",
+  "source_commit": "4850678d7340a67c4a86d808cabd14bb77c6430c",
+  "scope": "Documentation-only review of selected committed implementation and workflow sources. No private source contents or project records are exported. Presence in source does not establish deployment or customer access.",
+  "sources": [
+    {
+      "path": "agent-configs/pe-process/CLAUDE.md",
+      "sha256": "c8d827376378cb1ebc921a6aafaac6cac69de3adcf8f41be1cf799d01d07037b"
+    },
+    {
+      "path": "agent-configs/pe-cad/CLAUDE.md",
+      "sha256": "5e4073ca7b5b0b8a3b2996b27d863b0a2a0899b37a3d1fe8e1af14f0d3e3d20f"
+    },
+    {
+      "path": "agent-configs/pe-lead/CLAUDE.md",
+      "sha256": "df2dbff8cff8bbe551b200d57b78a451305512088264bcb92c2aeef4c83efcdd"
+    },
+    {
+      "path": "agent-configs/pe-deliverables/CLAUDE.md",
+      "sha256": "61adf04e2e2b54b275cb9ef8582057e6ab2d6f9220f3490e8860d7384caaff83"
+    },
+    {
+      "path": "agent-configs/pe-electrical/CLAUDE.md",
+      "sha256": "fbbbc518c9373a1a0489620f5bd76b16e6fc6c2a59053909d55eb61902def175"
+    },
+    {
+      "path": "agent-configs/pe-automation/CLAUDE.md",
+      "sha256": "0bdaa09e07c8a7a861c0377559fe2208ea36763976be56c1cfc6bbd24fba5185"
+    },
+    {
+      "path": "agent-configs/project-finance/CLAUDE.md",
+      "sha256": "6c4f45987175d56f9476604ccde927527b7dfcbe6d96e39c6dc109dcbb40386f"
+    },
+    {
+      "path": "agent-configs/maintenance/CLAUDE.md",
+      "sha256": "df12c553147559843d36f28a3fb9df2ab2f2f38d285af812c64c71bad0b53d04"
+    },
+    {
+      "path": "skills/bep-package/SKILL.md",
+      "sha256": "084cc6d93c43137d8f9c71fb0e30b134638a86bec35883014986797e8ced94db"
+    },
+    {
+      "path": "libs/engineering-utils/src/engineering_utils/deliverable_artifacts.py",
+      "sha256": "eb86849b7b31309261f1718c8ab1b49e573c6f6240524f71254031462e4bcfb5"
+    },
+    {
+      "path": "libs/engineering-utils/src/engineering_utils/process_sizing/chain_run.py",
+      "sha256": "c81e28e58774736c7ce7ee0229a924101b9612edb3f264929ed43f955d2dda34"
+    },
+    {
+      "path": "libs/engineering-utils/src/engineering_utils/process_sizing/production_pin.py",
+      "sha256": "5da3230f2263209de523bc8ef776941cd0a83352fa7ea7ff276247714df8eee0"
+    },
+    {
+      "path": "libs/engineering-utils/src/engineering_utils/process_sizing/model_code.py",
+      "sha256": "84393ba59ef7b4fd3d5316e7ece6cd32bf7cebfca6ce68be8615c0e01bebbabb"
+    },
+    {
+      "path": "servers/project-finance-workspace/proforma_engine/server.py",
+      "sha256": "9e7271fecf32a06ffd3066a73e83ae7ae844ed42b3edf50eaf8148d88293a0dd"
+    },
+    {
+      "path": "servers/project-finance-workspace/proforma_engine/audit.py",
+      "sha256": "d1c1a61197ee6418ed293486ee30f9cb08efb70273ae5dd2c3f060704c1de364"
+    },
+    {
+      "path": "agents/communication-agent/src/policy.py",
+      "sha256": "54ada16a1670950a1f7e1f4ced0b21fb0b4dc96efddc24adbea7f50690bd38de"
+    },
+    {
+      "path": "agents/communication-agent/src/session_store.py",
+      "sha256": "354dc00867af572d3ea2501fc4f062b7f7bb8444395f6004b3dde4eb6fbfde24"
+    },
+    {
+      "path": "agent-configs/marketing-content-team.md",
+      "sha256": "03b9a4ce8716e07412c8b415d0d13d7eb05edf2302d36c7823a0197f253bf5f9"
+    }
+  ],
+  "website_schema_snapshot": "2026-07-15"
+}

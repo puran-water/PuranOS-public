@@ -1,142 +1,36 @@
-# MCP Servers
+# MCP tools and access boundaries
 
-PuranOS uses MCP as the stable interface between agents and the systems they operate. In this repo, that interface is tuned for the kinds of toolchains an industrial wastewater and waste-to-value design-build firm actually needs: simulation engines, project controls, procurement, operations systems, and commercial follow-through.
+MCP provides a defined interface between an agent and tools or context. In PuranOS, it connects specialist agents to engineering computation and domain systems. Features differ by server and deployment; this guide does not claim a universal SDK version or identical primitive support across the fleet.
 
-## Why MCP Matters Here
+## Types of interface
 
-This repo spans many domains, many runtimes, and many applications. Without a stable tool contract, every agent prompt would need to know too much about every API.
+- **Tools** accept defined inputs and return results or perform authorized actions.
+- **Resources** expose information for a client to retrieve.
+- **Prompts** provide reusable interaction templates.
+- **Elicitation**, where implemented, requests additional information or confirmation. It does not itself establish that a client has authority to approve an engineering or commercial action.
 
-MCP solves that by centralizing authentication, typed contracts, governance boundaries, and reusable integration logic. But MCP is more than a tool-calling protocol — it defines four primitives that each serve a distinct purpose:
+## Engineering and business surfaces
 
-| Primitive | Direction | Purpose | PuranOS usage |
-|-----------|-----------|---------|---------------|
-| **Tools** | Agent → Server | Execute actions with typed inputs/outputs | 200+ tools across 22 servers, all on `fastmcp ≥ 3.0`: simulations, CRUD, governed mutations |
-| **Resources** | Server → Agent | Expose read-only data the agent can pull on demand | `ontology://dossier/equipment/{uid}`, `cmms://workorders/open`, `openproject://project/{id}/summary`, `kb://collections` |
-| **Prompts** | Server → Agent | Structured prompt templates with embedded context | `explore_entity` (ontology neighbor graph + lifecycle + actions), `lifecycle_audit` (state distribution + validation hints) |
-| **Elicitation** | Server → Agent | Request structured input during tool execution — the agent decides how to resolve it | Destructive operation confirmation gates on Atlas CMMS (delete work orders, assets, PM schedules) |
+| Family | Examples and purpose |
+| --- | --- |
+| Process computation | WaterTAP, QSDsan, chemistry, fluids and heat-transfer tooling for defined engineering cases. |
+| Equipment and engineering records | Equipment-identity and engineering writers; shared process and deliverable artifacts. |
+| CAD and engineering analysis | Geometry, registry binding, layout, connections, clearance and drawing workflows. |
+| Finance | Proforma assumptions, archived model runs, scenario comparisons and accounting-actuals analysis. |
+| Procurement and maintenance | Supplier/equipment evidence, inventory, asset history and maintenance work. |
+| Coordination | OpenProject and durable workflow tools for task state and execution. |
+| Read and knowledge | Ontology traversal, documents and linked narrative knowledge. |
 
-**Why this matters:** Tools alone make MCP a function-calling protocol. Resources make it a context protocol — agents can pull live system state without executing a tool call. Prompts embed domain expertise into the server contract so agents don't need it in their persona instructions. Elicitation lets the server declare "I need this information to proceed" without dictating how the agent obtains it — the agent may answer directly from available context, email the human who initiated the workflow for confirmation, create an OpenProject task for approval, or escalate through any other channel it has access to.
+An internal adapter or tool in source is not a public service entitlement. Determine availability, authorization and project scope for the actual deployment.
 
-The practical effect: a maintenance persona can read `cmms://workorders/open` as ambient context, execute `work_order(operation="change_status")` as a governed action, and when the server elicits confirmation for a destructive delete, the agent decides whether it has sufficient authority and context to confirm directly or whether to route the confirmation to a human — all within a single MCP session. The server contract declares the gate; the agent owns the resolution strategy.
+## Public customer connection
 
-## Current Server Families
+`https://intake.puranwater.com/mcp` is the public Streamable HTTP endpoint. It has no authentication for its public discovery surface. Its tools describe engagements, check fit and return data-preparation checklists. Optional submission and booking-link tools are separate actions. It does not expose internal simulation, files, financial models or project databases.
 
-The fleet runs end-to-end on `fastmcp ≥ 3.0` with the full primitive set — tools, resources, elicitation, and prompts — with persistent sessions across calls, structured cancellation, and MCP-native error envelopes. At a glance:
+See [connection instructions and tool behavior](../../integration/mcp.md).
 
-- **Engineering simulation:** the `processeng-workspace` family — QSDsan-engine (anaerobic / ADM1 / dynamic LCA), WaterTAP-engine (canonical steady-state biology + membranes + costing), PHREEQC, CoolProp + fluids, heat-transfer, corrosion, diagramming (DEXPI / SFILES / ISA-5.1 tagging), Mathcad
-- **Domain data (write-side):** `equipment-identity-mcp`, `procurement-mcp`, `compliance-mcp`, `contractor-management-mcp`, `project-controls` (via `pm-analytics`), `project-finance-workspace`, `parametric-costing-mcp`, `legal-mcp`
-- **Read / orchestration:** `ontology-mcp` (universal read), `openproject-mcp`, `hatchet-mcp`, `cpm-mcp`
-- **Knowledge:** `wiki-graph`, `knowledge-base`, `rag-backend`, `paperless-mcp`
-- **Reasoning / extraction:** `rlm-bridge` (Codex-backed multi-thousand-document corpus reasoning, Modal-hosted Docling extract endpoint, ArtifactStore companion MCP for single-pass cross-corpus structured-artifact writes)
-- **External integration:** `office-mcp` (Microsoft Graph: mail, calendar, files, transcripts), `google-workspace-mcp`, `atlas-cmms-mcp`, `inventree-mcp`, `twenty-mcp` (CRM), `quickbooks-mcp`, `wave-mcp`, `tally-mcp` (India accounting), `tia-portal-mcp` (Siemens PLC), `grafana-mcp`
+## Private project integrations
 
-### Project Delivery and Collaboration
+Define the source records and identifiers, schema version, permitted reads/writes, error behavior and review boundary. Prefer the domain’s intended writer for mutations; do not treat an ontology/read connection as blanket write access.
 
-| Server | Role |
-|--------|------|
-| `openproject-mcp` | OpenProject work packages, comments, relations, views, custom fields, and typed agent-task collaboration. Resources: project summaries, milestones, assigned tasks, custom field schemas. |
-| `cpm-mcp` | Schedule extraction, network analysis, what-if analysis, and OpenProject writeback for scheduling workflows |
-| `pm-analytics` | Project health, earned value, risk scan, design-build status, and portfolio-style project rollups |
-| `twenty-mcp` | CRM operations for revenue and pipeline workflows |
-
-### Operations, Inventory, and Execution
-
-| Server | Role |
-|--------|------|
-| `atlas-cmms-mcp` | CMMS interactions for maintenance operations. Resources: asset summaries, open work orders, upcoming PM, low-stock parts. Elicitation gates on destructive operations (delete WO/asset/PM). |
-| `inventree-mcp` | Inventory and manufacturing-adjacent operations (parts, stock, BOMs, purchase orders, barcodes, labels) |
-| `procurement-mcp` | Equipment procurement: vendor quotes, cost observations, datasheets, estimates, vendor guarantees. Write-only for domain data; reads via ontology-mcp. |
-| `quickbooks-mcp` and `wave-mcp` | Accounting and finance system integration |
-| `contractor-management-mcp` | DBIA contractor/subcontractor commercial management: contracts, SOV lines, G702/G703 pay applications, change order detail, warranty/LD claims. Thin financial sidecar to OpenProject. |
-
-### Engineering and Technical Computation
-
-The `processeng-workspace` contains the bulk of the domain-specific engineering surface. It includes server families for:
-
-- treatment process design
-- diagramming and layout
-- corrosion, heat transfer, and fluids analysis
-- WaterTAP- and QSDsan-oriented development work
-- discipline-specific design servers such as degassers, evaporators, RO, IX, and more
-
-Stream state (process stream data) is Postgres-primary, stored in the `stream_snapshot` table via engineering-mcp tools. Filesystem JSON export is available for local tooling but is not the durable store. The `plant-state-skill` provides the workflow SOP for stream reasoning.
-
-The diagramming server (`engineering-mcp`) treats a P&ID as schema'd state rather than a picture. An agent expands a SFILES block-flow diagram into a semantic contract, compiles it into an attributed DEXPI model — equipment, nozzles, validated piping segments, instruments, and off-page connectors all carrying their real attributes — and binds every tagged item to a UUID in the `component_metadata` ontology hub. ISA-18.2 alarms, control loops, and interlocks foreign-key to that UUID and survive tag renames. A single `design_basis_export` returns the model plus every bound alarm, loop, interlock, and stream row; the compiled sheet round-trips losslessly through Proteus XML (the DEXPI exchange format), verified by an attribute-level loss manifest that the test suite asserts is empty. The standards alignment (DEXPI / ISA-5.1 / ISA-18.2 / ISA-88 / IEC 61131-3) is backed by fidelity gates, not enumeration alone.
-
-This is supported by shared utilities in `libs/engineering-utils/`, which provides 32 contract schemas as Pydantic models with generated JSON Schema mirrors (engineering, instrumentation, compliance, project controls, project finance, contractor management, datasheet, document attachment, legal contract-twin, and inter-system exchange), plus 202 Postgres table schemas introspected from the live databases across 9 databases.
-
-Two worktree themes are especially important now:
-
-- QSDsan has become a multi-interface process engine with stronger public registries, mixed-model conversions, and downstream WaterTAP handoff.
-- WaterTAP has shifted toward a shared action-catalog architecture with session persistence, registry-backed discovery, detached jobs, and stronger MCP/CLI parity.
-
-At the monorepo level, that means the engineering stack is converging on reusable orchestration engines rather than isolated solver wrappers.
-
-### Cross-Domain Ontology
-
-| Server | Role |
-|--------|------|
-| `ontology-mcp` | Universal read layer across all 9 Postgres databases (compliance_mcp, contractor_management, engineering_mcp, equipment_identity, procurement, project_controls, project_finance, tally_accounting, legal) — domain servers remain write-only on their tables; ontology-mcp serves ~50 read tools that traverse the typed link catalog. Tools: `get_object`, `list_objects`, `find_related` (depth 1-3, `system.table` format), `get_entity_context` (unified context packet), `record_decision` (reasoning memory), `validate_action`, `list_allowed_actions` (subjects-based matching), `classify_equipment`, `rename_project`. Resources: neighbor graph, action details, persona capabilities. Prompts: `explore_entity`, `lifecycle_audit`. 345 typed links, 29 governed actions, 20 lifecycle state machines. |
-
-### Knowledge and Retrieval
-
-| Server | Role |
-|--------|------|
-| `wiki-graph` (wiki-global) | MCP access to the file-backed Knowledge Wiki — a markdown vault (Obsidian-compatible format) with wikilink graph traversal. Fork of mcpvault. 15 file I/O tools (read, write, patch, search, frontmatter, tags, move, delete) + 8 graph tools (`resolve_wikilink`, `backlinks`, `forwardlinks`, `neighbors`, `traverse`, `find_path`, `search_traverse`, `fragment`) + 2 health tools (`unresolved_links`, `graph_statistics`) + atomic `rename_with_link_updates`. Resources: graph stats, note manifest, orphan list, hub notes. Operates directly on markdown files — no intermediate database. Default deployment is a single shared `professional` vault; optional scoped `wiki-project` / `wiki-asset` servers for materialized read-only corpora. Agent-only access surface — no human UI. |
-| `knowledge-base` | Semantic search over curated knowledge base collections |
-| `rag-backend` | Retrieval-augmented generation for document-level context |
-
-### Compliance, Finance, and Growth
-
-Additional workspaces support:
-
-- compliance calculations and reporting
-- lead generation and external opportunity discovery
-- project finance workflows
-
-### Legal
-
-| Server | Role |
-|--------|------|
-| `legal-mcp` | In-house-counsel contract-twin over the `legal` Postgres database: models contracts, clauses, flowdown links, and typed legal facts; runs a deterministic scenario engine (LD caps, precedence / later-in-time resolution, vendor cure-period and excusability, LoL carve-outs); append-only provenance with `reviewed_by` and decision traces; `portfolio_query` surfaces upcoming deadlines across the contract portfolio. Write-only for domain data; reads via ontology-mcp. |
-
-## OpenProject as a First-Class Collaboration Server
-
-`openproject-mcp` deserves special attention because it is central to the repo's agentic collaboration model.
-
-Its current role is not just CRUD. It exposes the operations needed for collaborative agent work:
-
-- standard project and work package operations
-- comments, relations, hierarchy, and views
-- custom-field and schema helpers
-- typed agent-task creation and retrieval
-- explicit agent state updates
-- agent result posting and completion flows
-
-This is what allows the communication-agent, project-management persona, and human team members to collaborate on the same shared board.
-
-## Boundary Discipline
-
-This repo keeps each layer focused:
-
-- **MCP servers** define the full contract: tools (actions), resources (context), prompts (domain expertise), and elicitation (human checkpoints)
-- **Personas** define who can access which servers and under what constraints — they do not implement tool behavior
-- **Skills** define how work should be carried out once tools are available — procedural knowledge, not integration logic
-
-That separation is especially valuable because:
-- Resources let agents pull ambient context without the persona needing to know the query shape
-- Elicitation lets servers enforce human-in-the-loop gates without the agent implementing confirmation flows
-- Prompts embed domain expertise (e.g., "how to explore an ontology entity") in the server, not scattered across persona instructions
-
-## Customization
-
-When adding a new server:
-
-1. Define stable tool names with clear typed inputs and `annotations` (readOnlyHint, destructiveHint, idempotentHint)
-2. Add resources for any data agents should be able to pull as ambient context
-3. Add elicitation gates for destructive or irreversible operations
-4. Document mutation boundaries explicitly
-5. Add only the personas that truly need access
-6. Update the relevant architecture docs and ontology action manifests
-
-Avoid pushing domain logic into persona prompts when it belongs in a server contract or a reusable skill.
+A client can validate a payload’s shape without establishing that its contents are correct or suitable for construction. Access, data validation and engineering release are separate concerns.

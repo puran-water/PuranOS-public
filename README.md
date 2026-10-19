@@ -1,161 +1,63 @@
-# PuranOS-public
+# PuranOS — engineering that remembers
 
-PuranOS-public is the documentation-only companion to PuranOS, Puran Water LLC's integrated operating system for industrial engineering, project delivery, procurement, compliance, and governed agent execution.
+PuranOS is the working system behind Puran Water’s industrial wastewater and waste-to-value engineering services. Specialist agents use engineering tools and retained project records to prepare calculations, drawings, equipment schedules, financial scenarios and operating investigations. Engineers review the basis and release the work.
 
-It is built for Puran Water LLC and for industrial design-build firms working in industrial wastewater, treatment, recovery, and waste-to-value infrastructure. The platform is tuned for that operating environment today, while the architectural patterns remain extensible to other industrial engineering enterprises.
+This repository is the **public documentation companion**. It explains the architecture and integration approach; it does not distribute the private monorepo or grant access to customer projects.
 
-## The Central Thesis
+## Start with the work
 
-Building an AI-native industrial firm requires a properly schema'd data substrate first — not a memory or RAG layer as the primary knowledge store. That substrate comes from three sources: self-hosted enterprise OSS (OpenProject, CRM, inventory, CMMS — each brings a Postgres-backed domain ontology), shared Pydantic contract schemas (23 generated schemas: stream-state, equipment-item with OPC UA DI/AAS nameplate, ISA-18.2 alarm definitions, ISA-5.2 cause-effect matrices, ISA-88 control execution, IEC 61882 HAZOP/LOPA, NPDES water compliance, EIA-748 project controls, and 5 Ensaras exchange contracts — all with canonical URIs at `puranwater.com/schemas/`), and custom domain schemas (procurement, bid specification review). All exposed via typed MCP tool surfaces.
+| Service | How the system contributes |
+| --- | --- |
+| Conceptual design | Source-bound feed characterization, connected balances, process alternatives and CAPEX/OPEX assumptions. |
+| Process engineering | Shared equipment identities, calculations, CAD, schedules and document packages with review status. |
+| Technology supply | Process requirements and vendor evidence retained separately for equipment selection and package interfaces. |
+| Process optimization | Operating and maintenance evidence, model-based investigations and reviewed next actions. |
 
-This avoids the "Palantir-style" rework where firms with ad-hoc systems must later unify their ontology. The ontology exists by construction — it is the schema of the tools themselves.
+The useful memory is explicit: source inputs, model versions, equipment identity, decisions, unresolved questions and reviewed corrections. A later task can use those records without relying on the previous agent’s conversation.
 
-Where context does not reduce to typed fields — meeting synthesis, design rationale, competitive intelligence, lessons learned — a Knowledge Wiki (Obsidian-based, LLM-maintained) provides the complementary layer: agents compile raw sources into linked markdown articles, and humans browse via Obsidian's web UI.
+## For customers and their agents
 
-## Why This Repo Exists
+Engineering deliverables should remain useful after delivery. PuranOS workflows retain structured information alongside documents and schedules. The engagement defines the export formats, project scope and authorized interfaces a customer receives.
 
-Most industrial firms do not suffer from a lack of software. They suffer from fragmented execution:
+- [Agent-accessible deliverables](docs/integration/deliverables.md): identity, revisions, source information and a paired document/data example.
+- [Connect an LLM](docs/integration/mcp.md): the live public MCP server and its actual capabilities.
+- [Engineering services](https://puranwater.com/services/): what customers can engage Puran Water to deliver.
 
-- engineering models live in one toolchain
-- project work lives in another
-- commercial follow-through lives elsewhere
-- automation ends up trapped in brittle scripts or disconnected assistants
+Public MCP endpoint: `https://intake.puranwater.com/mcp` (Streamable HTTP; no authentication for public discovery tools). It returns service scope, project-fit checks and input checklists. Private engineering records and simulation tools are separate, authorized surfaces.
 
-PuranOS is designed to close that gap. It combines engineering-grade computation, durable orchestration, shared project state, and controlled tool execution into one operating model.
+## Architecture
 
-This public repo documents that architecture without exposing private infrastructure, credentials, or internal deployment details.
-
-## What PuranOS Does
-
-### Engineering and Technical Delivery
-
-- process engineering workflows for aerobic and anaerobic treatment, RO, IX, evaporation, degassing, corrosion, hydraulics, and stream-state reasoning
-- multi-interface engineering engines built around QSDsan and WaterTAP
-- shared engineering utilities for converters, heuristics, and model handoff
-- reusable skills that turn specialist engineering workflows into repeatable operating procedures
-
-### Project Execution and Agent Collaboration
-
-- OpenProject as the shared board for long-running work, dependencies, approvals, and human-agent collaboration
-- a communication and orchestration runtime that receives inbound work, routes it to the correct persona, and persists execution state durably
-- MCP servers that give agents typed, governed access to project, engineering, finance, and operations systems
-
-### Commercial, Operations, and Back Office
-
-- CRM, procurement, inventory, CMMS, accounting, compliance, and reporting integrations
-- specialist personas for project management, engineering, sales, procurement, maintenance, legal, and finance
-- tool-level governance so side effects are enforced where the tools execute, not only in prompts
-
-## Architecture At A Glance
-
-```text
-External systems and human operators
-            ↓
-Communication / orchestration runtime
-            ↓
-Persona layer + reusable skills
-            ↓
-MCP server layer
-            ↓
-Business systems + engineering engines
+```mermaid
+flowchart TD
+    A[Engineering task and source basis] --> B[Scoped specialist agents and shared skills]
+    B --> C[Engineering tools and domain writers]
+    C --> D[Structured project records and retained artifacts]
+    D --> E[Calculations, drawings and schedules]
+    E --> F[Engineering review and release]
+    F --> G[Customer documents and authorized agent handoff]
+    D --> H[Reviewed corrections to shared tools and workflows]
+    H --> B
 ```
 
-The most important design choice is the hybrid state model:
+OpenProject carries collaborative work. Runtime ledgers and durable workflow execution retain attempts and recovery state. Domain systems hold engineering and commercial records. Shared skills describe repeatable work; server policy and deployment permissions must enforce the actual access boundary.
 
-- OpenProject stores long-running collaborative project state
-- PostgreSQL stores execution reliability state such as deduplication, attempts, transitions, leases, and side-effect audit records
+## Read the documentation
 
-That split keeps project work legible to humans without sacrificing the exact semantics required for reliable agent execution.
+- [Architecture overview](docs/architecture/README.md)
+- [Specialist roles and handoffs](docs/architecture/personas/README.md)
+- [MCP tools and access boundaries](docs/architecture/mcp-servers/README.md)
+- [Identity and connected records](docs/architecture/ontology-layers/README.md)
+- [Execution, recovery and reproducibility](docs/architecture/agent-runtime/README.md)
+- [Engineering computation](docs/approach/engineering-engines.md)
+- [How reviewed learning is retained](docs/approach/skills-as-expertise.md)
+- [Documentation index](docs/README.md)
 
-## Start Here
+The updated website guides are linked to the **dev preview** while the production website remains on its existing release. The MCP endpoint itself is live.
 
-**Understand the approach:**
-- [Why PuranOS Is Built This Way](docs/approach/README.md) — the six architectural bets
-- [Schema Over Memory](docs/approach/schema-over-memory.md) — the flagship thesis
+## Evidence and scope
 
-**See the architecture:**
-- [Architecture Overview](docs/architecture/README.md) — layers, hybrid state model, MCP contracts
-- [Persona Boundaries](docs/architecture/personas/README.md) — why scoped agents matter
-- [Ontology Layers](docs/architecture/ontology-layers/README.md) — the three sources of schema'd state
+Reviewed October 19, 2026 against internal source commit `4850678d7340a67c4a86d808cabd14bb77c6430c`. [Source manifest](docs/source-snapshot.json) records the inspected source paths and hashes without publishing their private contents. [Current capability notes](docs/current-state.md) distinguish implemented workflows, public access and deployment-specific behavior.
 
-**Read the evidence:**
-- [Research Index](docs/research/README.md) — coordination, memory, and counter-evidence
+The public schema catalog is a separately dated snapshot. A schema, configured persona or passing software check is not proof of engineering acceptance, standards certification, universal deployment or measured savings. Financial baselines, forecasts and actuals remain distinguishable; reviewed learning is human-directed.
 
-**Learn more:**
-- [For Curious Industrial Engineers](docs/community/README.md) — who this is for and how to connect
-
-## Documentation Map
-
-### Approach and Design Philosophy
-
-- [Why PuranOS Is Built This Way](docs/approach/README.md)
-- [The Primacy of Schema'd State](docs/approach/schema-over-memory.md)
-- [Knowledge Wiki for Unstructured Context](docs/approach/knowledge-wiki.md)
-- [OpenProject as Coordination Substrate](docs/approach/coordination-substrate.md)
-- [Why Skills Compound](docs/approach/skills-as-expertise.md)
-- [First-Class Engineering Computation](docs/approach/engineering-engines.md)
-- [Industrial Standards Alignment](docs/approach/standards-and-conformance.md)
-
-### Architecture
-
-- [Architecture Overview](docs/architecture/README.md)
-- [Agent Runtime](docs/architecture/agent-runtime/README.md)
-- [MCP Servers](docs/architecture/mcp-servers/README.md)
-- [Persona Boundaries](docs/architecture/personas/README.md)
-- [Ontology Layers](docs/architecture/ontology-layers/README.md)
-
-### Research and Evidence
-
-- [Research Index](docs/research/README.md)
-- [Coordination and State](docs/research/coordination-and-state.md)
-- [Schema Over Memory](docs/research/schema-over-memory.md)
-
-### Operations
-
-- [Provisioning Guide](docs/provisioning/README.md)
-- [Communication Agent](docs/runtime/communication-agent/README.md)
-- [OpenProject MCP](docs/servers/openproject-mcp.md)
-- [GIS MCP](docs/servers/gis-mcp.md)
-- [Hydraulic MCP](docs/servers/hydraulic-mcp.md)
-- [OpenProject Service Notes](docs/services/openproject.md)
-
-### Skills
-
-- [Water Network Design](docs/skills/water-network-design.md)
-
-### Community
-
-- [For Curious Industrial Engineers](docs/community/README.md)
-- [The Skill Model](docs/community/skill-contribution-guide.md)
-
-## Public Repo Scope
-
-This repository is intentionally documentation-only. It is meant to explain:
-
-- the operating model
-- the architectural decisions
-- the collaboration patterns
-- the deployment principles
-
-It is not a public mirror of the full internal monorepo.
-
-## Source Snapshot
-
-This documentation export reflects the internal PuranOS monorepo at source commit `49cb0a0` (2026-06-11).
-
-Recent monorepo commits that informed this documentation refresh:
-
-- `49cb0a0` (2026-06-11) — engineering-mcp full-fidelity design basis: semantic P&ID compile, UUID-bound alarm/loop/interlock data, lossless DEXPI/Proteus round trip
-- `b19d0ea` (2026-05-19) — gis-mcp Group-B world search + Group-C raster reasoning (OSS Earth-Engine substitute)
-- `497af5e` (2026-05-18) — pe-water-supply agent + gis-mcp + hydraulic-mcp + water-network-design skill
-- `c43d804` (2026-05-15) — Universal Proposal Pipeline Fix (themes A–K)
-
-## Contact
-
-For technical collaboration:
-
-- Puran Water LLC
-- Hersh Kshetry, Founder & Principal Engineer
-- Website: [puranwater.com](https://puranwater.com/)
-- Contact page: [puranwater.com/contact](https://puranwater.com/contact/)
-- Schedule a call: [calendar.app.google/M1jzSdCB51sYiWux6](https://calendar.app.google/M1jzSdCB51sYiWux6)
+[Puran Water](https://puranwater.com/) · [Connect your LLM](https://revamp.puranwater-com.pages.dev/connect/) · [Engineering Insights](https://puranwater.com/blog/)

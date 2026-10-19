@@ -1,5 +1,7 @@
 # OpenProject as Coordination Substrate
 
+> Reference essay retained from the earlier documentation. For the October 2026 implementation and access boundaries, see [current capability notes](../current-state.md). Historical counts, deployment examples and research claims here are not a live inventory.
+
 ## Why this exists
 
 Multi-agent systems need shared state. But shared state implemented as
