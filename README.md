@@ -1,63 +1,75 @@
 # PuranOS — engineering that remembers
 
-PuranOS is the working system behind Puran Water’s industrial wastewater and waste-to-value engineering services. Specialist agents use engineering tools and retained project records to prepare calculations, drawings, equipment schedules, financial scenarios and operating investigations. Engineers review the basis and release the work.
+PuranOS is the working system behind [Puran Water](https://puranwater.com/): industrial water, wastewater and waste-to-value process engineering, equipment support and operating investigations. Specialist agents use engineering tools and retained project records. Engineers review the basis and authorize release.
 
-This repository is the **public documentation companion**. It explains the architecture and integration approach; it does not distribute the private monorepo or grant access to customer projects.
+This repository is the public documentation companion. Selected calculation tools are released separately; the complete monorepo, customer records and internal configurations are private.
 
-## Start with the work
+## One engineering basis, from proposal to basic engineering
 
-| Service | How the system contributes |
-| --- | --- |
-| Conceptual design | Source-bound feed characterization, connected balances, process alternatives and CAPEX/OPEX assumptions. |
-| Process engineering | Shared equipment identities, calculations, CAD, schedules and document packages with review status. |
-| Technology supply | Process requirements and vendor evidence retained separately for equipment selection and package interfaces. |
-| Process optimization | Operating and maintenance evidence, model-based investigations and reviewed next actions. |
-
-The useful memory is explicit: source inputs, model versions, equipment identity, decisions, unresolved questions and reviewed corrections. A later task can use those records without relying on the previous agent’s conversation.
-
-## For customers and their agents
-
-Engineering deliverables should remain useful after delivery. PuranOS workflows retain structured information alongside documents and schedules. The engagement defines the export formats, project scope and authorized interfaces a customer receives.
-
-- [Agent-accessible deliverables](docs/integration/deliverables.md): identity, revisions, source information and a paired document/data example.
-- [Connect an LLM](docs/integration/mcp.md): the live public MCP server and its actual capabilities.
-- [Engineering services](https://puranwater.com/services/): what customers can engage Puran Water to deliver.
-
-Public MCP endpoint: `https://intake.puranwater.com/mcp` (Streamable HTTP; no authentication for public discovery tools). It returns service scope, project-fit checks and input checklists. Private engineering records and simulation tools are separate, authorized surfaces.
-
-## Architecture
+`/sizing-to-balance` is the engineering core: unit coverage, heuristic pre-sizing, appropriate process simulation, recycle convergence and whole-plant balance. It retains the calculation basis, equipment identities, stream states, schedules and unresolved conditions for the revision.
 
 ```mermaid
-flowchart TD
-    A[Engineering task and source basis] --> B[Scoped specialist agents and shared skills]
-    B --> C[Engineering tools and domain writers]
-    C --> D[Structured project records and retained artifacts]
-    D --> E[Calculations, drawings and schedules]
-    E --> F[Engineering review and release]
-    F --> G[Customer documents and authorized agent handoff]
-    D --> H[Reviewed corrections to shared tools and workflows]
-    H --> B
+flowchart LR
+  A[Source basis and owner decisions] --> B[Sizing to balance]
+  B --> C[Retained engineering package]
+  C --> D[Proposal: technical and commercial review]
+  C --> E[BEP: coordinated discipline engineering]
+  C --> F[Studio: drawings, concept and evidence]
 ```
 
-OpenProject carries collaborative work. Runtime ledgers and durable workflow execution retain attempts and recovery state. Domain systems hold engineering and commercial records. Shared skills describe repeatable work; server policy and deployment permissions must enforce the actual access boundary.
+`/proposal-workflow` builds the technical proposal and commercial offer from that package. `/bep-workflow` starts its discipline authoring and review loop from the sealed sizing basis. [Follow the workflow](docs/workflows.md).
 
-## Read the documentation
+## Review the design in PuranOS Studio
 
-- [Architecture overview](docs/architecture/README.md)
-- [Specialist roles and handoffs](docs/architecture/personas/README.md)
-- [MCP tools and access boundaries](docs/architecture/mcp-servers/README.md)
-- [Identity and connected records](docs/architecture/ontology-layers/README.md)
-- [Execution, recovery and reproducibility](docs/architecture/agent-runtime/README.md)
-- [Engineering computation](docs/approach/engineering-engines.md)
-- [How reviewed learning is retained](docs/approach/skills-as-expertise.md)
-- [Documentation index](docs/README.md)
+Studio presents retained process drawings, review-stage concept geometry, equipment properties, sizing evidence and associated lists. Linked appearances share engineering identity and a source revision. R1 supports BFD/balance review; R2 carries PFDs and lists; R3 brings P&IDs, concept geometry and the line list together.
 
-The updated website guides are linked to the **dev preview** while the production website remains on its existing release. The MCP endpoint itself is live.
+Studio is an authorized review surface. It does not run a new design calculation or issue the engineering package. [Explore Studio](docs/studio.md).
 
-## Evidence and scope
+## Meet the specialists
 
-Reviewed October 19, 2026 against internal source commit `4850678d7340a67c4a86d808cabd14bb77c6430c`. [Source manifest](docs/source-snapshot.json) records the inspected source paths and hashes without publishing their private contents. [Current capability notes](docs/current-state.md) distinguish implemented workflows, public access and deployment-specific behavior.
+The owner coordinates work, with `pe-process` running the proposal and BEP procedures. Dedicated civil, piping and EHS personas work alongside CAD, mechanical, structural, electrical, automation, water-supply, separation, narrative and deliverables specialists. Cost estimation, procurement, finance, project management and operations connect engineering to delivery.
 
-The public schema catalog is a separately dated snapshot. A schema, configured persona or passing software check is not proof of engineering acceptance, standards certification, universal deployment or measured savings. Financial baselines, forecasts and actuals remain distinguishable; reviewed learning is human-directed.
+The former `pe-lead` persona is retired. [Current responsibilities and handoffs](docs/architecture/personas/README.md).
 
-[Puran Water](https://puranwater.com/) · [Connect your LLM](https://revamp.puranwater-com.pages.dev/connect/) · [Engineering Insights](https://puranwater.com/blog/)
+## Install a public engineering tool
+
+| Repository | Calculation scope |
+| --- | --- |
+| [fluids-mcp](https://github.com/puran-water/fluids-mcp) | Pipe flow, pipe and valve sizing, fluid properties and bounded sweeps. |
+| [heat-transfer-mcp](https://github.com/puran-water/heat-transfer-mcp) | Heat exchangers, air cooling, heat loss, insulation and thermal properties. |
+| [water-chemistry-mcp](https://github.com/puran-water/water-chemistry-mcp) | PHREEQC speciation, mixing, saturation and chemical-dosing screens. |
+| [corrosion-engineering-mcp](https://github.com/puran-water/corrosion-engineering-mcp) | Corrosion chemistry and model-specific screening with applicability limits. |
+| [qsdsan-engine-mcp](https://github.com/puran-water/qsdsan-engine-mcp) | Dynamic treatment-process simulation, job state and numerical time series. |
+| [watertap-engine-mcp](https://github.com/puran-water/watertap-engine-mcp) | Steady-state flowsheets using WaterTAP, IDAES and Pyomo with solver diagnostics. |
+The six servers provide local MCP stdio entrypoints. Installation uses public Git sources, including the narrow `puran-mcp-support` package hosted inside the fluids repository. Each README contains an installation command, client configuration, known issues and licence inventory. PyPI publication is not part of the current installation path.
+
+`v0.1.0` preserves the initial release. The default branch receives scoped improvements from PuranOS through a one-way mirror. Its source commit is recorded in `.puran-mirror.json`. Privacy, secrets, rights and packaging checks can refuse an export. Installed tools update only when the user reinstalls or upgrades them; pin both the server and support commits for repeatability.
+
+Tools return calculations and structured evidence. The calling LLM interprets them and writes the explanation. The published packages do not include customer records, supplier pricing, internal project approvals or the complete proposal/BEP orchestration.
+
+## Other public repositories
+
+- [autocad-mcp](https://github.com/puran-water/autocad-mcp): Windows AutoCAD LT automation and a separate headless DXF backend.
+- [freecad-mcp](https://github.com/puran-water/freecad-mcp): a FreeCAD integration fork; its add-on and runtime are required.
+- [pandid](https://github.com/puran-water/pandid): a process-drawing fork; stream labels are supplied data, not a mass-balance calculation.
+- [quetzal](https://github.com/puran-water/quetzal): a FreeCAD workbench fork with its own installation and upstream requirements.
+- [docuseal-customizations](https://github.com/puran-water/docuseal-customizations): published source for the Docuseal customization, with its AGPL obligations.
+- [adm1-mcp](https://github.com/puran-water/adm1-mcp) and [mathcad-mcp](https://github.com/puran-water/mathcad-mcp): earlier integrations. They are not members of the six-server automatic mirror.
+
+Archived repositories retain historical implementations. Candidate archives may gain documentation notices while staying archived; a candidate is not a new release. Follow the active server READMEs for current installation.
+
+[Built by Puran Water](https://puranwater.com/) · [Describe your engineering need](https://puranwater.com/contact/)
+
+Each README provides the Git-based quick start, MCP client configuration, known issues and licensing. `v0.1.0` is the initial immutable release; current branches receive scoped improvements from the monorepo through the checked public mirror. The calling LLM interprets structured tool results and writes the report. [Distribution, updates and other public repositories](docs/public-tools.md).
+
+## Connect your team
+
+- [Deliverables and customer handoff](docs/integration/deliverables.md): documents, structured information, identity and agreed access.
+- [Public intake MCP](docs/integration/mcp.md): service discovery, project-fit checks and input checklists. Internal engineering tools and project records are separate surfaces.
+- [Discuss a project](https://puranwater.com/contact/): bring the basis, the decision and the evidence available.
+
+## Read further
+
+[Architecture](docs/architecture/README.md) · [Execution and recovery](docs/architecture/agent-runtime/README.md) · [MCP scope](docs/architecture/mcp-servers/README.md) · [Connected records](docs/architecture/ontology-layers/README.md) · [Documentation index](docs/README.md)
+
+The [revamped website](https://revamp.puranwater-com.pages.dev/puranos/) is a preview until its production launch. Workflow, Studio, persona and release descriptions were reviewed on November 7, 2026; [current-state notes](docs/current-state.md) identify the scope. Separately dated schema and qualification snapshots retain their original meaning.

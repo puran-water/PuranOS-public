@@ -1,26 +1,23 @@
 # Current capability notes
 
-Reviewed October 19, 2026 against the [source snapshot](source-snapshot.json).
+Workflow, Studio, persona and public-package descriptions reviewed November 7, 2026 against monorepo source `3b953fdf4ab723241514916964d5cbf50dd3451a` and current public repository metadata. This updates the scoped October 19 review; historical source and qualification snapshots retain their dates.
 
-| Surface | What the reviewed implementation supports | Boundary |
+| Surface | Current capability | Boundary |
 | --- | --- | --- |
-| Engineering calculations | Shared sizing and process-model workflows, retained inputs, result artifacts, run receipts and series code pins. | Applicability and convergence are examined for each case. Dependency changes are reported; a prompt is not a deterministic specification. |
-| Equipment and CAD | Stable equipment identities, registry-bound geometry, typed access/clearance checks and model-derived deliverables. | A tag match or generated drawing alone does not establish an acceptable design. |
-| Engineering packages | Shared records feed schedules and document renderers; document identity, revision and review status accompany the package. | Required checks and release authority are workflow-specific. |
-| Finance | Archived model inputs and projections, scenario comparisons and structured actual-versus-projection analysis. | Account mappings, periods, signs and assumptions require review. There is no claim of automatic end-to-end reconciliation with all plant telemetry. |
-| Operations | Configured signal review, equipment history and model-supported investigation. | Diagnostic coverage is limited to connected data and implemented models; covered diagnostic escalation is in pilot. The diagnostic workflow is advisory. |
-| Customer interoperability | Structured deliverable information, published reference schemas and separately authorized project interfaces. | No universal compatibility or default customer access to internal tools. |
-| Public MCP | Live service discovery, fit checks and input checklists at the published endpoint. | No private project records or engineering simulations. Optional submission is consent-based and separate from discovery. |
-| Reusable learning | Reviewed corrections committed to shared tools, workflows and instructions. | Adoption into an existing design is an explicit revision/replay decision, not automatic model learning. |
+| Sizing-to-balance | Unit coverage, heuristic sizing, model evaluation, recycle convergence and retained plant-balance evidence. | Basis, model applicability and closure require review for the actual duty. |
+| Proposal | Intake and decisions, engineering package, source-backed narrative and commercial offer preparation. | Filing, sending and issue need authorized action. |
+| BEP | Sealed sizing package seeds the B0–B13 discipline authoring and review loop. | An unresolved gate is visible; a document render does not grant approval. |
+| Studio | Retained drawing/concept publications, linked identity and engineering evidence at R1/R2/R3. | Controlled project access; review standing, not issued design. |
+| Personas | Separate civil, piping, EHS, electrical, automation and other discipline roles; owner coordination. | `pe-lead` is retired. Configured scope does not prove deployment or public availability. |
+| Public calculation packages | Fluids, heat transfer, water chemistry, corrosion, QSDsan and WaterTAP have standalone experimental releases and checked source mirroring. | Git installation; known engineering/platform limitations remain. Private data and full workflow orchestration are excluded. |
+| Agent-facing intake | Separately documented discovery, fit checks and input checklists. | No automatic access to project records or internal inference. |
+| Business systems | Entity-scoped systems and role permissions; portfolio-company ERP and Puran Water workflows have distinct ownership. | No universal OpenProject, CRM or bookkeeping authority across entities. |
+| Reusable improvements | Corrections land in shared code and can reach the public package scope through the mirror. | Historical project pins do not silently adopt new code. |
 
-## What changed since the earlier public overview
+## Public versus private
 
-The earlier overview emphasized a broad enterprise stack and fixed counts of agents, servers and schemas. The current guide follows the engineering work: source basis, specialist responsibilities, model execution, connected records, deliverable generation and review.
+The public documentation explains the working method. It does not expose private process instructions, customer or supplier records, credentials or commercial authority. New open-source candidates remain candidates; archived implementations are historical snapshots.
 
-The refreshed documentation includes CAD identity and clearance workflows, engineering-series reproducibility controls, shared deliverable artifacts, finance comparison boundaries and the public MCP connection. It removes unsupported fleet-wide guarantees and avoids counts that become stale as the monorepo changes.
+Studio screenshots must come from content cleared for public presentation and be checked for private labels, records and identities. Their captions describe the actual review standing.
 
-## Publication boundaries
-
-The public repository remains documentation-only. Source paths in the manifest identify evidence in the private monorepo; they are not public downloads. Client documents, database contents, credentials, private endpoints, correspondence and infrastructure configuration are excluded.
-
-The website’s schema catalog remains explicitly dated July 15, 2026. This documentation refresh does not relabel that historical export as a current database snapshot. Validate an actual integration against the schema and interface agreed for the project.
+The website's published schema catalogue is a separately dated reference export. This refresh does not relabel it as a live database snapshot.

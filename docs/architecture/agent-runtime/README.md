@@ -1,10 +1,13 @@
 # Execution, recovery and reproducibility
 
+> Current working-system guide: [proposal and BEP workflows](https://github.com/puran-water/PuranOS-public/blob/main/docs/workflows.md), [Studio](https://github.com/puran-water/PuranOS-public/blob/main/docs/studio.md), [specialist roles](https://github.com/puran-water/PuranOS-public/blob/main/docs/architecture/personas/README.md) and [public releases](https://github.com/puran-water/PuranOS-public/blob/main/docs/public-tools.md). Reference snapshots below retain their own scope and dates.
+
+
 PuranOS separates collaborative project state from execution state and engineering results. This allows a long-running task to retain its context without treating every conversation as a new source of truth.
 
 ## Coordination and execution
 
-OpenProject carries work packages, dependencies and human-visible task context. The communication runtime routes work to configured specialists. PostgreSQL-backed execution records retain work items, attempts, state transitions and side-effect history. Hatchet supports durable and scheduled workflows where configured.
+Project coordination is entity-scoped: the configured project system carries work packages, dependencies and human-visible context. Circle H2O uses its restricted ERPNext module surface; Puran Water follows its own assigned systems. OpenProject integrations remain part of the runtime where configured. The communication runtime routes work to configured specialists. PostgreSQL-backed execution records retain work items, attempts, state transitions and side-effect history. Hatchet supports durable and scheduled workflows where configured.
 
 Deduplication and recovery behavior belong to the particular workflow. A durable queue does not guarantee that every external action is safe to repeat. A mutation with an uncertain result needs an explicit recovery path.
 

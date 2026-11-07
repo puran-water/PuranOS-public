@@ -1,36 +1,21 @@
-# MCP tools and access boundaries
+# MCP surfaces and engineering libraries
 
-MCP provides a defined interface between an agent and tools or context. In PuranOS, it connects specialist agents to engineering computation and domain systems. Features differ by server and deployment; this guide does not claim a universal SDK version or identical primitive support across the fleet.
+MCP is the agent-facing interface to selected calculations and domain operations. Shared Python code imports engineering libraries directly; it does not call another MCP server to obtain a local library function.
 
-## Types of interface
+## Public calculations
 
-- **Tools** accept defined inputs and return results or perform authorized actions.
-- **Resources** expose information for a client to retrieve.
-- **Prompts** provide reusable interaction templates.
-- **Elicitation**, where implemented, requests additional information or confirmation. It does not itself establish that a client has authority to approve an engineering or commercial action.
+[Current public packages](../../public-tools.md) cover fluids, heat transfer, water chemistry, corrosion, dynamic QSDsan studies and steady-state WaterTAP flowsheets. They run through local stdio and use a public support package. Each repository documents installation, limitations and licensing.
 
-## Engineering and business surfaces
+These tools return structured numerical results, diagnostics and provenance appropriate to their operation. The caller supplies interpretation and reporting. Public availability does not imply complete qualification of every correlation or platform.
 
-| Family | Examples and purpose |
-| --- | --- |
-| Process computation | WaterTAP, QSDsan, chemistry, fluids and heat-transfer tooling for defined engineering cases. |
-| Equipment and engineering records | Equipment-identity and engineering writers; shared process and deliverable artifacts. |
-| CAD and engineering analysis | Geometry, registry binding, layout, connections, clearance and drawing workflows. |
-| Finance | Proforma assumptions, archived model runs, scenario comparisons and accounting-actuals analysis. |
-| Procurement and maintenance | Supplier/equipment evidence, inventory, asset history and maintenance work. |
-| Coordination | OpenProject and durable workflow tools for task state and execution. |
-| Read and knowledge | Ontology traversal, documents and linked narrative knowledge. |
+## Internal workflows and records
 
-An internal adapter or tool in source is not a public service entitlement. Determine availability, authorization and project scope for the actual deployment.
+The complete proposal/BEP procedures, project registry, procurement records, vendor pricing and approval operations are separate internal capabilities. A public tool installation does not grant access to them. Studio publishes retained review views under project access controls.
 
-## Public customer connection
+The public intake connector described in [the integration guide](../../integration/mcp.md) is a distinct discovery and engagement surface. It does not expose the internal engineering fleet.
 
-`https://intake.puranwater.com/mcp` is the public Streamable HTTP endpoint. It has no authentication for its public discovery surface. Its tools describe engagements, check fit and return data-preparation checklists. Optional submission and booking-link tools are separate actions. It does not expose internal simulation, files, financial models or project databases.
+## Source and updates
 
-See [connection instructions and tool behavior](../../integration/mcp.md).
+The monorepo is the source of truth for the released engineering servers. Its one-way mirror reconstructs the permitted export, checks privacy, secrets, rights and package boundaries, then advances each public branch. Version tags remain immutable. A failed scan refuses publication without rolling back the internal landing.
 
-## Private project integrations
-
-Define the source records and identifiers, schema version, permitted reads/writes, error behavior and review boundary. Prefer the domain’s intended writer for mutations; do not treat an ontology/read connection as blanket write access.
-
-A client can validate a payload’s shape without establishing that its contents are correct or suitable for construction. Access, data validation and engineering release are separate concerns.
+[Workflows](../../workflows.md) · [Studio](../../studio.md) · [Specialists](../personas/README.md)

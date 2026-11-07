@@ -1,5 +1,8 @@
 # Why PuranOS is built this way
 
+> Current working-system guide: [proposal and BEP workflows](https://github.com/puran-water/PuranOS-public/blob/main/docs/workflows.md), [Studio](https://github.com/puran-water/PuranOS-public/blob/main/docs/studio.md), [specialist roles](https://github.com/puran-water/PuranOS-public/blob/main/docs/architecture/personas/README.md) and [public releases](https://github.com/puran-water/PuranOS-public/blob/main/docs/public-tools.md). Reference snapshots below retain their own scope and dates.
+
+
 The engineering service should leave behind information that the next person or agent can use. That objective leads to several practical choices.
 
 ## Retain the basis

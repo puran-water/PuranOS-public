@@ -1,5 +1,8 @@
 # Provisioning Guide
 
+> Current working-system guide: [proposal and BEP workflows](https://github.com/puran-water/PuranOS-public/blob/main/docs/workflows.md), [Studio](https://github.com/puran-water/PuranOS-public/blob/main/docs/studio.md), [specialist roles](https://github.com/puran-water/PuranOS-public/blob/main/docs/architecture/personas/README.md) and [public releases](https://github.com/puran-water/PuranOS-public/blob/main/docs/public-tools.md). Reference snapshots below retain their own scope and dates.
+
+
 PuranOS provisioning is template-driven and sanitized by default. The deployment model is shaped by the needs of an industrial wastewater and waste-to-value design-build firm, but the patterns are intentionally reusable for other industrial engineering organizations with comparable operational complexity.
 
 ## Why This Exists
@@ -47,9 +50,11 @@ In the internal operational monorepo, the deployment model is expressed through 
 - communication-agent environment example
 - OpenProject MCP environment example
 
-## Recommended Rollout Sequence
+## Internal deployment pattern
 
-1. Bootstrap host dependencies and clone the repo.
+The public documentation repository is not an installable PuranOS deployment. The following sequence describes an authorized internal implementation; standalone public MCP tools have their own [installation guides](../public-tools.md).
+
+1. Bootstrap host dependencies and the authorized implementation checkout.
 2. Render `.env` files from tracked templates with environment-specific values.
 3. Start shared infrastructure and service stacks.
 4. Apply database migrations for long-running agents.

@@ -1,5 +1,8 @@
 # Identity and connected records
 
+> Current working-system guide: [proposal and BEP workflows](https://github.com/puran-water/PuranOS-public/blob/main/docs/workflows.md), [Studio](https://github.com/puran-water/PuranOS-public/blob/main/docs/studio.md), [specialist roles](https://github.com/puran-water/PuranOS-public/blob/main/docs/architecture/personas/README.md) and [public releases](https://github.com/puran-water/PuranOS-public/blob/main/docs/public-tools.md). Reference snapshots below retain their own scope and dates.
+
+
 Engineering continuity depends on knowing which item a record refers to and which revision of the basis produced it.
 
 ## Equipment position and physical asset

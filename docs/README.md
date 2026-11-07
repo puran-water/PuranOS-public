@@ -1,5 +1,8 @@
 # PuranOS documentation
 
+> Current working-system guide: [proposal and BEP workflows](https://github.com/puran-water/PuranOS-public/blob/main/docs/workflows.md), [Studio](https://github.com/puran-water/PuranOS-public/blob/main/docs/studio.md), [specialist roles](https://github.com/puran-water/PuranOS-public/blob/main/docs/architecture/personas/README.md) and [public releases](https://github.com/puran-water/PuranOS-public/blob/main/docs/public-tools.md). Reference snapshots below retain their own scope and dates.
+
+
 Reviewed October 19, 2026. Start with [current capability notes](current-state.md) and the [source snapshot](source-snapshot.json).
 
 ## Customers and integrations

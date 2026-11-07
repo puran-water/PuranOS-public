@@ -1,5 +1,8 @@
 # For Curious Industrial Engineers
 
+> Current working-system guide: [proposal and BEP workflows](https://github.com/puran-water/PuranOS-public/blob/main/docs/workflows.md), [Studio](https://github.com/puran-water/PuranOS-public/blob/main/docs/studio.md), [specialist roles](https://github.com/puran-water/PuranOS-public/blob/main/docs/architecture/personas/README.md) and [public releases](https://github.com/puran-water/PuranOS-public/blob/main/docs/public-tools.md). Reference snapshots below retain their own scope and dates.
+
+
 ## Why this exists
 
 This documentation exists because the intersection of AI and industrial process engineering is underserved. Most AI platforms are built for software companies. Most engineering software is built without AI in mind. PuranOS is built at the intersection — and we publish the architecture because the reasoning behind it is worth sharing.
@@ -18,11 +21,11 @@ If you work in industrial wastewater, treatment design, or design-build project 
 
 ## What you will find here
 
-This is not a product pitch. There is no signup page, no demo request form, no pricing tier.
+You can inspect the public tools and documentation, report reproducible defects or discuss a scoped engineering engagement with Puran Water. Studio demonstrations and project access are arranged separately.
 
 What you will find:
 
-- **The architectural thesis** — why schema-first approaches outperform memory systems for enterprise AI, backed by specific research findings. See [Schema Over Memory](../approach/schema-over-memory.md).
+- **The architectural thesis** — why PuranOS uses structured domain records for engineering authority, with supporting research and its limits. See [Schema Over Memory](../approach/schema-over-memory.md).
 
 - **The coordination model** — why a PM tool (OpenProject) serves as the shared board for human+AI task delegation, and what the research says about agent coordination. See [Coordination Substrate](../approach/coordination-substrate.md).
 

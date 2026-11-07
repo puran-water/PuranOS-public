@@ -1,5 +1,8 @@
 # Communication Agent
 
+> Current working-system guide: [proposal and BEP workflows](https://github.com/puran-water/PuranOS-public/blob/main/docs/workflows.md), [Studio](https://github.com/puran-water/PuranOS-public/blob/main/docs/studio.md), [specialist roles](https://github.com/puran-water/PuranOS-public/blob/main/docs/architecture/personas/README.md) and [public releases](https://github.com/puran-water/PuranOS-public/blob/main/docs/public-tools.md). Reference snapshots below retain their own scope and dates.
+
+
 The communication-agent is the repo's long-running orchestration service. It connects inbound events to the right specialist persona, persists execution state durably, and updates the shared project system so human and agent work remain aligned.
 
 ## Why This Exists
@@ -14,7 +17,7 @@ Most organizations do not need an agent that can do everything. They need a cont
 
 That is what this service provides.
 
-## What It Handles Today
+## Supported integration paths
 
 ### Microsoft Graph
 
@@ -60,9 +63,9 @@ Human-visible update in OpenProject or the source system
 
 The service is intentionally hybrid.
 
-### OpenProject Stores Long-Running Collaborative State
+### Project Systems Store Long-Running Collaborative State
 
-OpenProject carries:
+The OpenProject integration carries the following where configured; portfolio-company ERP workflows have separate ownership and access:
 
 - task hierarchy
 - predecessors and relations
@@ -70,7 +73,7 @@ OpenProject carries:
 - assignee-driven routing
 - typed agent-state fields
 
-This is the state humans should see and work with.
+Human-visible state belongs in the project system assigned to that entity. This is not a blanket authority to write every company’s projects to OpenProject.
 
 ### Postgres Stores Execution Reliability State
 
